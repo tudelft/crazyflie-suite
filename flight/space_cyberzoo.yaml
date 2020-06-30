@@ -1,0 +1,13 @@
+# Space specification file for Cyberzoo
+# Home
+home:
+  x: 0.0 
+  y: 0.0
+  z: 0.0
+
+# Ranges w.r.t. home
+# x and y are two-sided, z is one-sided
+range:
+  x: 2.0
+  y: 2.0
+  z: 1.0

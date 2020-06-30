@@ -1,0 +1,220 @@
+{
+    "uwb2posIn":{
+        "name": "uwb2posIn",
+        "type": "CF",
+        "period": 10,
+        "variables": ["UWB2POS.inX",
+                      "UWB2POS.inY",
+                      "UWB2POS.inZ"],
+        "headers": ["uwbInX", "uwbInY", "uwbInZ"]
+    },
+
+    "uwb2posEx":{
+        "name": "uwb2posEx",
+        "type": "CF",
+        "period": 10,
+        "variables": ["UWB2POS.exX",
+                      "UWB2POS.exY",
+                      "UWB2POS.exZ"],
+        "headers": ["uwbExX", "uwbExY", "uwbExZ"]
+    },
+
+    "uwb2posStats":{
+        "name": "uwb2posStats",
+        "type": "CF",
+        "period": 10,
+        "variables": ["UWB2POS.rtLoop",
+                      "UWB2POS.rtLaser",
+                      "UWB2POS.rtUwb",
+                      "UWB2POS.rtExt"],
+        "headers": ["uwbRateLoop", "uwbRateLaser", "uwbRateUwb", "uwbRateExt"]
+    },
+
+    "uwb2posCore":{
+        "name": "uwb2posCore",
+        "type": "CF",
+        "period": 10,
+        "variables": ["UWB2POS.coreForcedZ",
+                      "UWB2POS.coreX",
+                      "UWB2POS.coreY",
+                      "UWB2POS.coreZ"],
+        "headers": ["uwbCoreForcedZ", "uwbCoreX", "uwbCoreY", "uwbCoreZ"]
+    },
+
+    "twr":{
+        "name": "twr",
+        "type": "CF",
+        "period": 10,
+        "variables": ["ranging.distance0",
+                        "ranging.distance1",
+                        "ranging.distance2",
+                        "ranging.distance3"],
+        "headers": ["twr0", "twr1", "twr2", "twr3"]
+    },
+
+    "gyros":{
+        "name": "gyros",
+        "type": "CF",
+        "period": 10,
+        "variables": ["gyro.x",
+                        "gyro.y",
+                        "gyro.z"],
+        "headers": ["gyroX", "gyroY", "gyroZ"]
+    },
+
+    "attitude":{
+        "name": "attitude",
+        "type": "CF",
+        "period": 10,
+        "variables": ["stabilizer.roll",
+                        "stabilizer.pitch",
+                        "stabilizer.yaw"],
+        "headers": ["roll", "pitch", "yaw"]
+    },
+
+    "acc":{
+        "name": "acc",
+        "type": "CF",
+        "period": 10,
+        "variables": ["acc.x",
+                        "acc.y",
+                        "acc.z"],
+        "headers": ["accX", "accY", "accZ"]
+    },
+
+    "kalman":{
+        "name": "kalman",
+        "type": "CF",
+        "period": 10,
+        "variables": ["kalman.stateX",
+                        "kalman.stateY",
+                        "kalman.stateZ"],
+        "headers": ["kalX", "kalY", "kalZ"]
+    },
+    
+    "laser":{
+        "name": "laser",
+        "type": "CF",
+        "period": 10,
+        "variables": ["range.zrange"],
+        "headers": ["laserHeight"]
+    },
+    
+    "MHEpred":{
+        "name": "MHEpred",
+        "type": "CF",
+        "period": 10,
+        "variables": ["MHE.predX",
+                        "MHE.predY",
+                        "MHE.predZ"],
+        "headers": ["mhePredX", "mhePredY", "mhePredZ"]
+    },
+
+    "MHEpredV":{
+        "name": "MHEpredV",
+        "type": "CF",
+        "period": 10,
+        "variables": ["MHE.predVX",
+                        "MHE.predVY",
+                        "MHE.predVZ"],
+        "headers": ["mhePredVX", "mhePredVY", "mhePredVZ"]
+    },
+
+    "MHEcorr":{
+        "name": "MHEcorr",
+        "type": "CF",
+        "period": 10,
+        "variables": ["MHE.corrX",
+                        "MHE.corrY",
+                        "MHE.corrZ"],
+        "headers": ["mheCorrX", "mheCorrY", "mheCorrZ"]
+    },
+
+    "MHEcorrV":{
+        "name": "MHEcorrV",
+        "type": "CF",
+        "period": 10,
+        "variables": ["MHE.corrVX",
+                        "MHE.corrVY",
+                        "MHE.corrVZ"],
+        "headers": ["mheCorrVX", "mheCorrVY", "mheCorrVZ"]
+    },
+
+    "MHEfinal":{
+        "name": "MHEfinal",
+        "type": "CF",
+        "period": 10,
+        "variables": ["MHE.finX",
+                        "MHE.finY",
+                        "MHE.finZ"],
+        "headers": ["mheFinX", "mheFinY", "mheFinZ"]
+    },
+
+    "MHEfinalV":{
+        "name": "MHEfinalV",
+        "type": "CF",
+        "period": 10,
+        "variables": ["MHE.finVX",
+                        "MHE.finVY",
+                        "MHE.finVZ"],
+        "headers": ["mheFinVX", "mheFinVY", "mheFinVZ"]
+    },
+
+    "MHEex":{
+        "name": "MHEex",
+        "type": "CF",
+        "period": 10,
+        "variables": ["MHE.exX",
+                        "MHE.exY",
+                        "MHE.exZ"],
+        "headers": ["mheExX", "mheExY", "mheExZ"]
+    },
+
+    "MHEuwb":{
+        "name": "MHEuwb",
+        "type": "CF",
+        "period": 10,
+        "variables": ["MHE.uwbX",
+                        "MHE.uwbY",
+                        "MHE.uwbZ"],
+        "headers": ["mheUwbX", "mheUwbY", "mheUwbZ"]
+    },
+
+    "MHEstats":{
+        "name": "MHEstats",
+        "type": "CF",
+        "period": 10,
+        "variables": ["MHE.rtNoInliers"],
+        "headers": ["mheRateNoInliers"]
+    },
+
+    "state":{
+        "name": "state",
+        "type": "CF",
+        "period": 10,
+        "variables": ["stateEstimate.x",
+                        "stateEstimate.y",
+                        "stateEstimate.z"],
+        "headers": ["stateX", "stateY", "stateZ"]
+    },
+
+    "otpos":{
+        "name": "otpos",
+        "type": "EXT",
+        "period": 10,
+        "variables": ["otX",
+                        "otY",
+                        "otZ"],
+        "headers": ["otX", "otY", "otZ"]
+    },
+    
+    "otatt":{
+        "name": "otatt",
+        "type": "EXT",
+        "period": 10,
+        "variables": ["otRoll",
+                        "otPitch",
+                        "otYaw"],
+        "headers": ["otRoll", "otPitch", "otYaw"]
+    }
+}

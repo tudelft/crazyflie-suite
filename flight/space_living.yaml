@@ -1,0 +1,13 @@
+# Space specification file for living room
+# Home
+home:
+  x: 1.4
+  y: 1.7
+  z: 0.0
+
+# Ranges w.r.t. home
+# x and y are two-sided, z is one-sided
+range:
+  x: 0.5
+  y: 1.0
+  z: 1.0
