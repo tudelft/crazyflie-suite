@@ -5,6 +5,7 @@ Execute a Crazyflie flight and log it.
 import argparse
 import time
 from datetime import datetime
+from pathlib import Path
 
 import yaml
 import numpy as np
@@ -270,6 +271,9 @@ if __name__ == "__main__":
     uri = "radio://0/100/2M/E7E7E7E7E7"
     cflib.crtp.init_drivers(enable_debug_driver=False)
     cf = Crazyflie(rw_cache="./cache")
+
+    # Create directory if not there
+    Path(args["fileroot"]).mkdir(exist_ok=True)
 
     # Set up logging
     flogger = setup_logger(

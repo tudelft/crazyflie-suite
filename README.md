@@ -20,6 +20,11 @@ $ pip install -e .
 
 We're installing the package in editable (`-e`) mode, such that we can change it without having to install again.
 
+Code is formatted using [Black](https://github.com/psf/black). To automatically format when committing, run this once:
+```bash
+$ pre-commit install
+```
+
 # Logging a flight
 
 Files needed:

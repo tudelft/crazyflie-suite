@@ -1,4 +1,5 @@
 venv/
+data/
 .vscode/
 **/__pycache__/
 **/*.egg-info/
