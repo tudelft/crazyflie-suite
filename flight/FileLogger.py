@@ -1,8 +1,8 @@
 """
-Contains the FileLogger class that can be used to log crazyflie data to an external file
-
-Author: Sven Pfeiffer, MAVLab TU Delft
+Contains the FileLogger class that can be used to log Crazyflie data to an external file.
+Author: Sven Pfeiffer, MAVLab
 """
+
 import time
 import json
 
@@ -17,7 +17,7 @@ class FileLogger:
     external config.
     """
 
-    def __init__(self, crazyflie, link_uri, fileName):
+    def __init__(self, crazyflie, link_uri, configName, fileName):
         """ Initialize and run the example with the specified link_uri """
         self._cf = crazyflie
         self._link_uri = link_uri
@@ -29,7 +29,7 @@ class FileLogger:
         self._cf.connection_lost.add_callback(self._connection_lost)
 
         # import log configs from logcfg.json
-        with open("logcfg.json") as json_config_file:
+        with open(configName) as json_config_file:
             self._cfg_defs = json.load(json_config_file)
 
         # list of enabled configurations

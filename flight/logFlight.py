@@ -2,10 +2,10 @@
 Execute a Crazyflie flight and log it.
 """
 
+import argparse
 import time
 from datetime import datetime
 
-import click
 import yaml
 import numpy as np
 
@@ -18,14 +18,6 @@ from flight.NatNetClient import NatNetClient
 from flight.preparedTrajectories import *
 
 
-@click.option(
-    "--trajectory",
-    type=click.Choice(
-        ["hover", "square", "octagon", "triangle", "hourglass", "random", "scan"],
-        case_sensitive=False,
-    ),
-    default="hover",
-)
 def create_filename(fileroot, estimator, uwb, optitrack, trajectory):
     # Date
     date = datetime.today().strftime(r"%Y-%m-%d+%H:%M:%S")
@@ -36,27 +28,19 @@ def create_filename(fileroot, estimator, uwb, optitrack, trajectory):
         options = "+".join([estimator, uwb, trajectory])
 
     # Join
-    return f"{fileroot}/{date}+{options}.csv"
+    if fileroot[-1] == "/":
+        return f"{fileroot}{date}+{options}.csv"
+    else:
+        return f"{fileroot}/{date}+{options}.csv"
 
 
-@click.command()
-@click.option("--fileroot", type=str, required=True)
-@click.option(
-    "--estimator",
-    type=click.Choice(["kalman", "mhe"], case_sensitive=False),
-    required=True,
-)
-@click.option(
-    "--uwb", type=click.Choice(["twr", "tdoa"], case_sensitive=False), required=True
-)
-@click.option("--optitrack", is_flag=True)
-def setup_logger(cf, uri, fileroot, estimator, uwb, optitrack):
+def setup_logger(cf, uri, fileroot, logconfig, estimator, uwb, optitrack, trajectory):
     # Create filename from options and date
-    file = create_filename(fileroot, estimator, uwb, optitrack)
+    file = create_filename(fileroot, estimator, uwb, optitrack, trajectory)
     print(f"Log location: {file}")
 
     # Logger setup
-    flogger = FileLogger(cf, uri, file)
+    flogger = FileLogger(cf, uri, logconfig, file)
 
     # Enable log configurations based on system setup:
     # Defaults
@@ -99,10 +83,7 @@ def setup_logger(cf, uri, fileroot, estimator, uwb, optitrack):
     return flogger
 
 
-@click.command()
-@click.option("--optitrack", is_flag=True)
-@click.option("--otid", type=int, default=None)
-def setup_optitrack(optitrack, otid):
+def setup_optitrack(optitrack):
     # If we don't use OptiTrack
     if not optitrack:
         ot_position = None
@@ -121,15 +102,9 @@ def setup_optitrack(optitrack, otid):
         print("OptiTrack streaming client started")
 
     # TODO: do we need to return StreamingClient?
-    return ot_position, ot_attitude, otid
+    return ot_position, ot_attitude
 
 
-@click.command()
-@click.option(
-    "--estimator",
-    type=click.Choice(["kalman", "mhe"], case_sensitive=False),
-    required=True,
-)
 def reset_estimator(cf, estimator):
     # Kalman
     if estimator == "kalman":
@@ -174,25 +149,6 @@ def receive_rigidbody_frame(id, position, rotation):
         flogger.registerData("otatt", ot_att_dict)
 
 
-@click.command()
-@click.option(
-    "--trajectory",
-    type=click.Choice(
-        [
-            "nothing",
-            "hover",
-            "square",
-            "octagon",
-            "triangle",
-            "hourglass",
-            "random",
-            "scan",
-        ],
-        case_sensitive=False,
-    ),
-    default="hover",
-)
-@click.option("--space", type=str, required=True)
 def select_trajectory(trajectory, space):
     # Load yaml file with space specification
     with open(space, "r") as f:
@@ -231,6 +187,7 @@ def select_trajectory(trajectory, space):
 def follow_setpoints(cf, setpoints):
     # Start
     try:
+        print("Flight started")
         # Do nothing, just sit on the ground
         if setpoints is None:
             while True:
@@ -258,8 +215,11 @@ def follow_setpoints(cf, setpoints):
                     wait = distance * 2
 
                 # Send position and wait
-                cf.send_position_setpoint(*point)
-                time.sleep(wait)
+                time_passed = 0.0
+                while time_passed < wait:
+                    cf.commander.send_position_setpoint(*point)
+                    time.sleep(0.05)
+                    time_passed += 0.05
 
             # Finished
             cf.commander.send_stop_setpoint()
@@ -271,12 +231,40 @@ def follow_setpoints(cf, setpoints):
         else:
             print("Emergency landing!")
             wait = setpoints[i][2] * 2
-            cf.send_position_setpoint(*setpoints[i][:2], 0.0, 0.0)
+            cf.commander.send_position_setpoint(*setpoints[i][:2], 0.0, 0.0)
             time.sleep(wait)
             cf.commander.send_stop_setpoint()
 
 
 if __name__ == "__main__":
+
+    # Parse arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--fileroot", type=str, required=True)
+    parser.add_argument("--logconfig", type=str, required=True)
+    parser.add_argument("--space", type=str, required=True)
+    parser.add_argument(
+        "--estimator", choices=["kalman", "mhe"], type=str.lower, required=True
+    )
+    parser.add_argument("--uwb", choices=["twr", "tdoa"], type=str.lower, required=True)
+    parser.add_argument(
+        "--trajectory",
+        choices=[
+            "nothing",
+            "hover",
+            "square",
+            "octagon",
+            "triangle",
+            "hourglass",
+            "random",
+            "scan",
+        ],
+        type=str.lower,
+        default="hover",
+    )
+    parser.add_argument("--optitrack_id", type=int, default=None)
+    parser.add_argument("--optitrack", action="store_true")
+    args = vars(parser.parse_args())
 
     # Set up Crazyflie
     uri = "radio://0/100/2M/E7E7E7E7E7"
@@ -284,25 +272,37 @@ if __name__ == "__main__":
     cf = Crazyflie(rw_cache="./cache")
 
     # Set up logging
-    flogger = setup_logger(cf, uri)
+    flogger = setup_logger(
+        cf,
+        uri,
+        args["fileroot"],
+        args["logconfig"],
+        args["estimator"],
+        args["uwb"],
+        args["optitrack"],
+        args["trajectory"],
+    )
 
     # Check OptiTrack if it's there
-    ot_position, ot_attitude, ot_id = setup_optitrack()
+    ot_id = args["optitrack_id"]
+    ot_position, ot_attitude = setup_optitrack(args["optitrack"])
 
     # Wait for fix
-    while (ot_position == 0).any():
-        print("Waiting for OptiTrack fix...")
-        time.sleep(1)
+    if ot_position is not None:
+        while (ot_position == 0).any():
+            print("Waiting for OptiTrack fix...")
+            time.sleep(1)
+        print("OptiTrack fix acquired")
 
     # Reset estimator
-    reset_estimator(cf)
+    reset_estimator(cf, args["estimator"])
     time.sleep(2)
 
     # Select trajectory
-    setpoints = select_trajectory()
+    setpoints = select_trajectory(args["trajectory"], args["space"])
 
     # Do flight
-    follow_setpoints(setpoints)
+    follow_setpoints(cf, setpoints)
 
     # End flight
     print("Done")

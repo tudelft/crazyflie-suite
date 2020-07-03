@@ -4,6 +4,7 @@ Author: S. Pfeiffer, MAVLab
 """
 
 import math
+import numpy as np
 import numpy.linalg as npl
 
 RAD2DEG = 180 / math.pi
@@ -28,14 +29,14 @@ def quat2euler(q):
     else:
         pitch = pitch + 180
 
-    eulerAngles = [roll, pitch, yaw]
+    eulerAngles = np.array([roll, pitch, yaw])
 
     return eulerAngles
 
 
 def ot2ned(vector_3d_ot):
     # Convert vector from OptiTrack coordinates to NED
-    vector_3d_ned = [0, 0, 0]
+    vector_3d_ned = np.zeros(3)
     vector_3d_ned[0] = vector_3d_ot[0]  # NED.x = OT.x
     vector_3d_ned[1] = vector_3d_ot[2]  # NED.y = OT.z
     vector_3d_ned[2] = -vector_3d_ot[1]  # NED.z = -OT.y
@@ -45,7 +46,7 @@ def ot2ned(vector_3d_ot):
 
 def ot2control(vector_3d_ot):
     # Convert vector from OptiTrack coordinates to Crazyflie control coordinates
-    vector_3d_ctrl = [0, 0, 0]
+    vector_3d_ctrl = np.zeros(3)
     vector_3d_ctrl[0] = vector_3d_ot[2]  # CONTROL.x = OT.z
     vector_3d_ctrl[1] = vector_3d_ot[0]  # CONTROL.y = OT.x
     vector_3d_ctrl[2] = vector_3d_ot[1]  # CONTROL.z = OT.y

@@ -1,8 +1,8 @@
 # Space specification file for living room
 # Home
 home:
-  x: 1.4
-  y: 1.7
+  x: 1.2
+  y: 1.8
   z: 0.0
 
 # Ranges w.r.t. home
@@ -10,4 +10,4 @@ home:
 range:
   x: 0.5
   y: 1.0
-  z: 1.0
+  z: 0.8
