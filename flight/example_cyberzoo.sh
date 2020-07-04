@@ -6,13 +6,13 @@ if [[ "${PWD##*/}" != crazyflie-suite ]]; then
     exit 1
 fi
 
-# Run from project root
-python flight/logFlight.py \
+# Run
+python flight/log_flight.py \
     --fileroot data \
     --logconfig flight/logcfg.json \
     --space flight/space_cyberzoo.yaml \
     --estimator kalman \
     --uwb twr \
-    --trajectory square \
+    --trajectory square square \
     --optitrack \
     --optitrack_id 1

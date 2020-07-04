@@ -7,10 +7,10 @@ if [[ "${PWD##*/}" != crazyflie-suite ]]; then
 fi
 
 # Run
-python flight/logFlight.py \
+python flight/log_flight.py \
     --fileroot data \
     --logconfig flight/logcfg.json \
     --space flight/space_living.yaml \
     --estimator kalman \
     --uwb twr \
-    --trajectory scan \
+    --trajectory square square

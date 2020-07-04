@@ -18,7 +18,7 @@
 # Uses the Python NatNetClient.py library to establish a connection (by creating a NatNetClient),
 # and receive data via a NatNet connection and decode it using the NatNetClient library.
 
-from NatNetClient import NatNetClient
+from flight.NatNetClient import NatNetClient
 
 # This is a callback function that gets connected to the NatNet client and called once per mocap frame.
 # def receiveNewFrame( frameNumber, markerSetCount, unlabeledMarkersCount, rigidBodyCount, skeletonCount,

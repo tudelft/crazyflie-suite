@@ -12,7 +12,7 @@ def takeoff(x, y, altitude, yaw):
     return setpoints
 
 
-def land(x, y, altitude, yaw):
+def landing(x, y, altitude, yaw):
     setpoints = [(x, y, altitude, yaw), (x, y, 0, yaw)]
 
     return setpoints

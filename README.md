@@ -37,7 +37,7 @@ A flight can be started by running `python flight/logFlight.py`. Several argumen
 - `--space`: location of the flight space specification
 - `--estimator`: which estimator to use (`kalman` or `mhe`, must be compatible with flashed firmware)
 - `--uwb`: which UWB mode to use (`twr` or `tdoa`, must be compatible with anchor settings)
-- `--trajectory`: trajectory to fly (see [here](flight/preparedTrajectories.py) for all options)
+- `--trajectory`: trajectory (or trajectories) to fly (see [here](flight/prepared_trajectories.py) for all options)
 - `--optitrack`: flag for using OptiTrack
 - `--optitrack_id`: if using OptiTrack, provide the rigid body ID here
 
