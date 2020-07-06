@@ -46,10 +46,23 @@
         "type": "CF",
         "period": 10,
         "variables": ["ranging.distance0",
-                        "ranging.distance1",
-                        "ranging.distance2",
-                        "ranging.distance3"],
+                      "ranging.distance1",
+                      "ranging.distance2",
+                      "ranging.distance3"],
         "headers": ["twr0", "twr1", "twr2", "twr3"]
+    },
+
+    "tdoa":{
+        "name": "tdoa",
+        "type": "CF",
+        "period": 10,
+        "variables": ["tdoa.diff01",
+                      "tdoa.diff02",
+                      "tdoa.diff03",
+                      "tdoa.diff12",
+                      "tdoa.diff13",
+                      "tdoa.diff23"],
+        "headers": ["tdoa01", "tdoa02", "tdoa03", "tdoa12", "tdoa13", "tdoa23"]
     },
 
     "gyros":{
@@ -57,8 +70,8 @@
         "type": "CF",
         "period": 10,
         "variables": ["gyro.x",
-                        "gyro.y",
-                        "gyro.z"],
+                      "gyro.y",
+                      "gyro.z"],
         "headers": ["gyroX", "gyroY", "gyroZ"]
     },
 
@@ -67,8 +80,8 @@
         "type": "CF",
         "period": 10,
         "variables": ["stabilizer.roll",
-                        "stabilizer.pitch",
-                        "stabilizer.yaw"],
+                      "stabilizer.pitch",
+                      "stabilizer.yaw"],
         "headers": ["roll", "pitch", "yaw"]
     },
 
@@ -77,8 +90,8 @@
         "type": "CF",
         "period": 10,
         "variables": ["acc.x",
-                        "acc.y",
-                        "acc.z"],
+                      "acc.y",
+                      "acc.z"],
         "headers": ["accX", "accY", "accZ"]
     },
 
@@ -87,8 +100,8 @@
         "type": "CF",
         "period": 10,
         "variables": ["kalman.stateX",
-                        "kalman.stateY",
-                        "kalman.stateZ"],
+                      "kalman.stateY",
+                      "kalman.stateZ"],
         "headers": ["kalX", "kalY", "kalZ"]
     },
     
@@ -100,13 +113,22 @@
         "headers": ["laserHeight"]
     },
     
+    "flow":{
+        "name": "flow",
+        "type": "CF",
+        "period": 10,
+        "variables": ["motion.deltaX",
+                      "motion.deltaY"],
+        "headers": ["flowX", "flowY"]
+    },
+
     "MHEpred":{
         "name": "MHEpred",
         "type": "CF",
         "period": 10,
         "variables": ["MHE.predX",
-                        "MHE.predY",
-                        "MHE.predZ"],
+                      "MHE.predY",
+                      "MHE.predZ"],
         "headers": ["mhePredX", "mhePredY", "mhePredZ"]
     },
 
@@ -115,8 +137,8 @@
         "type": "CF",
         "period": 10,
         "variables": ["MHE.predVX",
-                        "MHE.predVY",
-                        "MHE.predVZ"],
+                      "MHE.predVY",
+                      "MHE.predVZ"],
         "headers": ["mhePredVX", "mhePredVY", "mhePredVZ"]
     },
 
@@ -125,8 +147,8 @@
         "type": "CF",
         "period": 10,
         "variables": ["MHE.corrX",
-                        "MHE.corrY",
-                        "MHE.corrZ"],
+                      "MHE.corrY",
+                      "MHE.corrZ"],
         "headers": ["mheCorrX", "mheCorrY", "mheCorrZ"]
     },
 
@@ -135,8 +157,8 @@
         "type": "CF",
         "period": 10,
         "variables": ["MHE.corrVX",
-                        "MHE.corrVY",
-                        "MHE.corrVZ"],
+                      "MHE.corrVY",
+                      "MHE.corrVZ"],
         "headers": ["mheCorrVX", "mheCorrVY", "mheCorrVZ"]
     },
 
@@ -145,8 +167,8 @@
         "type": "CF",
         "period": 10,
         "variables": ["MHE.finX",
-                        "MHE.finY",
-                        "MHE.finZ"],
+                      "MHE.finY",
+                      "MHE.finZ"],
         "headers": ["mheFinX", "mheFinY", "mheFinZ"]
     },
 
@@ -155,8 +177,8 @@
         "type": "CF",
         "period": 10,
         "variables": ["MHE.finVX",
-                        "MHE.finVY",
-                        "MHE.finVZ"],
+                      "MHE.finVY",
+                      "MHE.finVZ"],
         "headers": ["mheFinVX", "mheFinVY", "mheFinVZ"]
     },
 
@@ -165,8 +187,8 @@
         "type": "CF",
         "period": 10,
         "variables": ["MHE.exX",
-                        "MHE.exY",
-                        "MHE.exZ"],
+                      "MHE.exY",
+                      "MHE.exZ"],
         "headers": ["mheExX", "mheExY", "mheExZ"]
     },
 
@@ -175,8 +197,8 @@
         "type": "CF",
         "period": 10,
         "variables": ["MHE.uwbX",
-                        "MHE.uwbY",
-                        "MHE.uwbZ"],
+                      "MHE.uwbY",
+                      "MHE.uwbZ"],
         "headers": ["mheUwbX", "mheUwbY", "mheUwbZ"]
     },
 
@@ -193,8 +215,8 @@
         "type": "CF",
         "period": 10,
         "variables": ["stateEstimate.x",
-                        "stateEstimate.y",
-                        "stateEstimate.z"],
+                      "stateEstimate.y",
+                      "stateEstimate.z"],
         "headers": ["stateX", "stateY", "stateZ"]
     },
 
@@ -203,8 +225,8 @@
         "type": "EXT",
         "period": 10,
         "variables": ["otX",
-                        "otY",
-                        "otZ"],
+                      "otY",
+                      "otZ"],
         "headers": ["otX", "otY", "otZ"]
     },
     
@@ -213,8 +235,8 @@
         "type": "EXT",
         "period": 10,
         "variables": ["otRoll",
-                        "otPitch",
-                        "otYaw"],
+                      "otPitch",
+                      "otYaw"],
         "headers": ["otRoll", "otPitch", "otYaw"]
     }
 }

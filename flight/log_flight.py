@@ -24,14 +24,21 @@ from flight.trajectories import takeoff, landing
 from flight.prepared_trajectories import *
 
 
-def create_filename(fileroot, estimator, uwb, optitrack, trajectory):
+def create_filename(fileroot, keywords, estimator, uwb, optitrack, trajectory):
     # Date
     date = datetime.today().strftime(r"%Y-%m-%d+%H:%M:%S")
+
+    # Additional keywords
+    if keywords is not None:
+        keywords = "+" + "+".join(keywords)
+    else:
+        keywords = ""
+
     # Options
     if optitrack:
-        options = "+".join([estimator, uwb, "_".join(trajectory), "optitrack"])
+        options = f"{estimator}+{uwb}{keywords}+optitrack+{'_'.join(trajectory)}"
     else:
-        options = "+".join([estimator, uwb, "_".join(trajectory)])
+        options = f"{estimator}+{uwb}{keywords}+{'_'.join(trajectory)}"
 
     # Join
     if fileroot[-1] == "/":
@@ -40,9 +47,11 @@ def create_filename(fileroot, estimator, uwb, optitrack, trajectory):
         return f"{fileroot}/{date}+{options}.csv"
 
 
-def setup_logger(cf, uri, fileroot, logconfig, estimator, uwb, optitrack, trajectory):
+def setup_logger(
+    cf, uri, fileroot, keywords, logconfig, estimator, uwb, optitrack, trajectory
+):
     # Create filename from options and date
-    file = create_filename(fileroot, estimator, uwb, optitrack, trajectory)
+    file = create_filename(fileroot, keywords, estimator, uwb, optitrack, trajectory)
     print(f"Log location: {file}")
 
     # Logger setup
@@ -58,7 +67,7 @@ def setup_logger(cf, uri, fileroot, logconfig, estimator, uwb, optitrack, trajec
     if uwb == "twr":
         flogger.enableConfig("twr")
     elif uwb == "tdoa":
-        pass
+        flogger.enableConfig("tdoa")
     # OptiTrack
     if optitrack:
         flogger.enableConfig("otpos")
@@ -67,11 +76,12 @@ def setup_logger(cf, uri, fileroot, logconfig, estimator, uwb, optitrack, trajec
     if estimator == "kalman":
         flogger.enableConfig("kalman")
         flogger.enableConfig("laser")
+        flogger.enableConfig("flow")
     elif estimator == "mhe":
-        flogger.enableConfig("uwb2posIn")
-        flogger.enableConfig("uwb2posEx")
-        flogger.enableConfig("uwb2posStats")
-        flogger.enableConfig("uwb2posCore")
+        # flogger.enableConfig("uwb2posIn")
+        # flogger.enableConfig("uwb2posEx")
+        # flogger.enableConfig("uwb2posStats")
+        # flogger.enableConfig("uwb2posCore")
         flogger.enableConfig("MHEpred")
         flogger.enableConfig("MHEpredV")
         flogger.enableConfig("MHEcorr")
@@ -157,7 +167,6 @@ def receive_rigidbody_frame(id, position, rotation):
 
 def console_cb(text):
     global console_log
-    print("text")
     console_log.append(text)
 
 
@@ -329,6 +338,7 @@ if __name__ == "__main__":
     # Parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--fileroot", type=str, required=True)
+    parser.add_argument("--keywords", nargs="+", type=str.lower, default=None)
     parser.add_argument("--logconfig", type=str, required=True)
     parser.add_argument("--space", type=str, required=True)
     parser.add_argument(
@@ -359,6 +369,7 @@ if __name__ == "__main__":
         cf,
         uri,
         args["fileroot"],
+        args["keywords"],
         args["logconfig"],
         args["estimator"],
         args["uwb"],
