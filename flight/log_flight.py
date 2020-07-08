@@ -214,7 +214,7 @@ def process_taskdump(file, console_log):
 
         # Save dataframes
         load_data.to_csv(file.strip(".csv") + "+load.csv", sep=",", index=False)
-        stack_data.to_csv(file.strip(".csv") + "+stack.csv", sep=",", index=False)
+        stack_data.to_csv(file.strip(".csv") + "+stackleft.csv", sep=",", index=False)
     else:
         print("No task dump data found")
 
