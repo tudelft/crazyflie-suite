@@ -14,5 +14,5 @@ python flight/log_flight.py \
     --estimator kalman \
     --uwb twr \
     --trajectory square square \
-    --optitrack \
+    --optitrack logging \
     --optitrack_id 1
