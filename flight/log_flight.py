@@ -35,8 +35,10 @@ def create_filename(fileroot, keywords, estimator, uwb, optitrack, trajectory):
         keywords = ""
 
     # Options
-    if optitrack:
-        options = f"{estimator}+{uwb}{keywords}+optitrack+{'_'.join(trajectory)}"
+    if optitrack == "logging":
+        options = f"{estimator}+{uwb}{keywords}+optitracklog+{'_'.join(trajectory)}"
+    elif optitrack == "state":
+        options = f"{estimator}+{uwb}{keywords}+optitrackstate+{'_'.join(trajectory)}"
     else:
         options = f"{estimator}+{uwb}{keywords}+{'_'.join(trajectory)}"
 
@@ -69,7 +71,7 @@ def setup_logger(
     elif uwb == "tdoa":
         flogger.enableConfig("tdoa")
     # OptiTrack
-    if optitrack:
+    if optitrack != "none":
         flogger.enableConfig("otpos")
         flogger.enableConfig("otatt")
     # Estimator
@@ -101,7 +103,7 @@ def setup_logger(
 
 def setup_optitrack(optitrack):
     # If we don't use OptiTrack
-    if not optitrack:
+    if optitrack == "none":
         ot_position = None
         ot_attitude = None
     # If we do use OptiTrack
@@ -264,7 +266,7 @@ def build_trajectory(trajectories, space):
     return setpoints
 
 
-def follow_setpoints(cf, setpoints):
+def follow_setpoints(cf, setpoints, optitrack):
     # Counter for task dump logging
     time_since_dump = 0.0
 
@@ -307,6 +309,11 @@ def follow_setpoints(cf, setpoints):
                 # Send position and wait
                 time_passed = 0.0
                 while time_passed < wait:
+                    # If we use OptiTrack for control, send position to Crazyflie
+                    if optitrack == "state":
+                        cf.extpos.send_extpos(
+                            ot_position[0], ot_position[1], ot_position[2]
+                        )
                     cf.commander.send_position_setpoint(*point)
                     time.sleep(0.05)
                     time_passed += 0.05
@@ -342,13 +349,30 @@ if __name__ == "__main__":
     parser.add_argument("--logconfig", type=str, required=True)
     parser.add_argument("--space", type=str, required=True)
     parser.add_argument(
-        "--estimator", choices=["kalman", "mhe"], type=str.lower, required=True
+        "--estimator",
+        choices=["complementary", "kalman", "mhe"],
+        type=str.lower,
+        required=True,
     )
-    parser.add_argument("--uwb", choices=["twr", "tdoa"], type=str.lower, required=True)
+    parser.add_argument(
+        "--uwb", choices=["none", "twr", "tdoa"], type=str.lower, required=True
+    )
     parser.add_argument("--trajectory", nargs="+", type=str.lower, required=True)
+    parser.add_argument(
+        "--optitrack",
+        choices=["none", "logging", "state"],
+        type=str.lower,
+        default="none",
+    )
     parser.add_argument("--optitrack_id", type=int, default=None)
-    parser.add_argument("--optitrack", action="store_true")
     args = vars(parser.parse_args())
+
+    # If no UWB, then OptiTrack
+    if args["uwb"] == "none":
+        assert (
+            args["estimator"] == "complementary"
+        ), "Absence of UWB will lead Crazyflie to set estimator to 'complementary', unless you put on stuff like a Flowdeck (in which case you can uncomment this and select 'kalman')"
+        assert args["optitrack"] == "state", "OptiTrack state needed in absence of UWB"
 
     # Set up Crazyflie
     uri = "radio://0/100/2M/E7E7E7E7E7"
@@ -396,7 +420,7 @@ if __name__ == "__main__":
     setpoints = build_trajectory(args["trajectory"], args["space"])
 
     # Do flight
-    follow_setpoints(cf, setpoints)
+    follow_setpoints(cf, setpoints, args["optitrack"])
 
     # End flight
     print("Done")
