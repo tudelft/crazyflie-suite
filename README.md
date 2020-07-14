@@ -35,10 +35,12 @@ A flight can be started by running `python flight/logFlight.py`. Several argumen
 - `--fileroot`: folder to store the log
 - `--logconfig`: location of the logging configuration
 - `--space`: location of the flight space specification
-- `--estimator`: which estimator to use (`kalman` or `mhe`, must be compatible with flashed firmware)
-- `--uwb`: which UWB mode to use (`twr` or `tdoa`, must be compatible with anchor settings)
+- `--estimator`: which estimator to use (`complementary`, `kalman` or `mhe`, must be compatible with flashed firmware)
+- `--uwb`: which UWB mode to use (`none`, `twr` or `tdoa`, must be compatible with anchor settings)
 - `--trajectory`: trajectory (or trajectories) to fly (see [here](flight/prepared_trajectories.py) for all options)
-- `--optitrack`: flag for using OptiTrack
+- `--optitrack`: how to use OptiTrack (`none`, `logging` or `state`)
 - `--optitrack_id`: if using OptiTrack, provide the rigid body ID here
 
-An example of all this can be found [here](flight/example_cyberzoo.sh).
+Note that some options are incompatible. For instance, without UWB (`none`), you need OptiTrack for providing state (`state`) and the complementary estimator (`complementary`) if you have no other decks on your Crazyflie (if you do have a Flowdeck for example, you can comment the assert in the code, as it will trigger the Crazyflie to use the Kalman estimator).
+
+A simple example can be found [here](configs/example_cyberzoo.sh).
