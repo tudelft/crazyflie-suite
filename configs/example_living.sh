@@ -9,6 +9,7 @@ fi
 # Run
 python flight/log_flight.py \
     --fileroot data \
+    --keywords athome \
     --logconfig flight/logcfg.json \
     --space flight/space_living.yaml \
     --estimator kalman \

@@ -9,6 +9,7 @@ fi
 # Run
 python flight/log_flight.py \
     --fileroot data \
+    --keywords cyberzoo \
     --logconfig flight/logcfg.json \
     --space flight/space_cyberzoo.yaml \
     --estimator kalman \
