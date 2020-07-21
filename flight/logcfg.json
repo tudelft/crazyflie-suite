@@ -1,46 +1,4 @@
 {
-    "uwb2posIn":{
-        "name": "uwb2posIn",
-        "type": "CF",
-        "period": 10,
-        "variables": ["UWB2POS.inX",
-                      "UWB2POS.inY",
-                      "UWB2POS.inZ"],
-        "headers": ["uwbInX", "uwbInY", "uwbInZ"]
-    },
-
-    "uwb2posEx":{
-        "name": "uwb2posEx",
-        "type": "CF",
-        "period": 10,
-        "variables": ["UWB2POS.exX",
-                      "UWB2POS.exY",
-                      "UWB2POS.exZ"],
-        "headers": ["uwbExX", "uwbExY", "uwbExZ"]
-    },
-
-    "uwb2posStats":{
-        "name": "uwb2posStats",
-        "type": "CF",
-        "period": 10,
-        "variables": ["UWB2POS.rtLoop",
-                      "UWB2POS.rtLaser",
-                      "UWB2POS.rtUwb",
-                      "UWB2POS.rtExt"],
-        "headers": ["uwbRateLoop", "uwbRateLaser", "uwbRateUwb", "uwbRateExt"]
-    },
-
-    "uwb2posCore":{
-        "name": "uwb2posCore",
-        "type": "CF",
-        "period": 10,
-        "variables": ["UWB2POS.coreForcedZ",
-                      "UWB2POS.coreX",
-                      "UWB2POS.coreY",
-                      "UWB2POS.coreZ"],
-        "headers": ["uwbCoreForcedZ", "uwbCoreX", "uwbCoreY", "uwbCoreZ"]
-    },
-
     "twr":{
         "name": "twr",
         "type": "CF",
@@ -122,68 +80,8 @@
         "headers": ["flowX", "flowY"]
     },
 
-    "MHEpred":{
-        "name": "MHEpred",
-        "type": "CF",
-        "period": 10,
-        "variables": ["MHE.predX",
-                      "MHE.predY",
-                      "MHE.predZ"],
-        "headers": ["mhePredX", "mhePredY", "mhePredZ"]
-    },
-
-    "MHEpredV":{
-        "name": "MHEpredV",
-        "type": "CF",
-        "period": 10,
-        "variables": ["MHE.predVX",
-                      "MHE.predVY",
-                      "MHE.predVZ"],
-        "headers": ["mhePredVX", "mhePredVY", "mhePredVZ"]
-    },
-
-    "MHEcorr":{
-        "name": "MHEcorr",
-        "type": "CF",
-        "period": 10,
-        "variables": ["MHE.corrX",
-                      "MHE.corrY",
-                      "MHE.corrZ"],
-        "headers": ["mheCorrX", "mheCorrY", "mheCorrZ"]
-    },
-
-    "MHEcorrV":{
-        "name": "MHEcorrV",
-        "type": "CF",
-        "period": 10,
-        "variables": ["MHE.corrVX",
-                      "MHE.corrVY",
-                      "MHE.corrVZ"],
-        "headers": ["mheCorrVX", "mheCorrVY", "mheCorrVZ"]
-    },
-
-    "MHEfinal":{
-        "name": "MHEfinal",
-        "type": "CF",
-        "period": 10,
-        "variables": ["MHE.finX",
-                      "MHE.finY",
-                      "MHE.finZ"],
-        "headers": ["mheFinX", "mheFinY", "mheFinZ"]
-    },
-
-    "MHEfinalV":{
-        "name": "MHEfinalV",
-        "type": "CF",
-        "period": 10,
-        "variables": ["MHE.finVX",
-                      "MHE.finVY",
-                      "MHE.finVZ"],
-        "headers": ["mheFinVX", "mheFinVY", "mheFinVZ"]
-    },
-
-    "MHEex":{
-        "name": "MHEex",
+    "MHEout":{
+        "name": "MHEout",
         "type": "CF",
         "period": 10,
         "variables": ["MHE.exX",
@@ -192,13 +90,13 @@
         "headers": ["mheExX", "mheExY", "mheExZ"]
     },
 
-    "MHEuwb":{
-        "name": "MHEuwb",
+    "MHEin":{
+        "name": "MHEin",
         "type": "CF",
         "period": 10,
-        "variables": ["MHE.uwbX",
-                      "MHE.uwbY",
-                      "MHE.uwbZ"],
+        "variables": ["MHE.uwbQueueX",
+                      "MHE.uwbQueueY",
+                      "MHE.uwbQueueZ"],
         "headers": ["mheUwbX", "mheUwbY", "mheUwbZ"]
     },
 
@@ -206,8 +104,11 @@
         "name": "MHEstats",
         "type": "CF",
         "period": 10,
-        "variables": ["MHE.rtNoInliers"],
-        "headers": ["mheRateNoInliers"]
+        "variables": ["MHE.rtLoop",
+                      "MHE.rtPosUpdate",
+                      "MHE.rtCorrUpdate",
+                      "MHE.rtCall"],
+        "headers": ["mheRateLoop", "mheRatePosUpdate", "mheRateCorrUpdate", "mheRateCall"]
     },
 
     "state":{

@@ -80,18 +80,8 @@ def setup_logger(
         flogger.enableConfig("laser")
         flogger.enableConfig("flow")
     elif estimator == "mhe":
-        # flogger.enableConfig("uwb2posIn")
-        # flogger.enableConfig("uwb2posEx")
-        # flogger.enableConfig("uwb2posStats")
-        # flogger.enableConfig("uwb2posCore")
-        flogger.enableConfig("MHEpred")
-        flogger.enableConfig("MHEpredV")
-        flogger.enableConfig("MHEcorr")
-        flogger.enableConfig("MHEcorrV")
-        flogger.enableConfig("MHEfinal")
-        flogger.enableConfig("MHEfinalV")
-        flogger.enableConfig("MHEex")
-        flogger.enableConfig("MHEuwb")
+        flogger.enableConfig("MHEin")
+        flogger.enableConfig("MHEout")
         flogger.enableConfig("MHEstats")
 
     # Start
@@ -375,7 +365,7 @@ if __name__ == "__main__":
         assert args["optitrack"] == "state", "OptiTrack state needed in absence of UWB"
 
     # Set up Crazyflie
-    uri = "radio://0/100/2M/E7E7E7E7E7"
+    uri = "radio://0/80/2M/E7E7E7E7E7"
     cflib.crtp.init_drivers(enable_debug_driver=False)
     cf = Crazyflie(rw_cache="./cache")
 
