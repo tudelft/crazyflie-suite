@@ -7,12 +7,18 @@ from datetime import datetime
 from dataclasses import dataclass, field
 
 # default serial port configuration
-DEVICE_DEFAULT = 'ttyACM3'
+DEVICE_DEFAULT = 'ttyACM1'
 BAUDRATE_DEFAULT = 115200
 FRAMESIZE_DEFAULT = 9
 N_ANCHOR = 7
-QUEUE_LENGTH = 20
-TEST_OPTIONS = 'Aruba'
+QUEUE_LENGTH = 50
+
+# Test options (for Filename)
+LOCATION = 'Aruba'
+TX_MODE = 'max'
+NOMINAL_RANGE = '7m'
+ANCHOR_ORIENTATION = 'A-V0'
+TAG_ORIENTATION = 'T-V0'
 
 # Anchor data
 @dataclass
@@ -29,13 +35,25 @@ anchorData = [AnchorData_s() for _ in range(N_ANCHOR)]
 
 """ Open Log File """
 def log_open():
-    date = datetime.today().strftime(r"%Y%m%d_%H%M%S")
-    file_name = date + "_twr_" + TEST_OPTIONS + ".csv"
+    date = datetime.today().strftime(r"%Y%m%d")
+    time = datetime.today().strftime(r"%H%M%S")
+
+    directory_name = '../data/{}-{}/'.format(LOCATION, date)
+    file_name = '{}_twr_{}_{}_{}_{}.csv'.format(
+        time, NOMINAL_RANGE, TX_MODE, ANCHOR_ORIENTATION, TAG_ORIENTATION)
+
     cwd = os.path.dirname(__file__)
-    file_path = os.path.join(cwd, '../data/', file_name)
+    dir_path = os.path.normpath(os.path.join(cwd, directory_name))
+    if not os.path.exists(dir_path):
+        os.mkdir(dir_path)
+        print("Created new data directory: '{}'".format(dir_path))
+    else:
+        print("Logging to existing data directory: '{}'".format(dir_path))
+    
     try:
+        file_path = os.path.join(dir_path, file_name)
         file_handle = open(file_path, 'w')
-        print("Opened log file at '{}'".format(file_path))
+        print("Opened new log file '{}'".format(file_name))
         header = "Time, ID, D, DMean{}, DStd{}, \n".format(QUEUE_LENGTH, QUEUE_LENGTH)
         file_handle.write(header)
         return file_handle
@@ -47,10 +65,10 @@ def log_open():
 def serial_connect(port, baudrate, timeout):
     try:
         ser = serial.Serial(port, baudrate, timeout=timeout)
-        print('Successfully connected to {}'.format(port))
+        print("Successfully connected to '{}'".format(port))
         return ser
     except serial.SerialException:
-        print('Could not connect to {}'.format(port))
+        print("Could not connect to '{}'".format(port))
         return None
     except ValueError:
         print('Could not open serial connection: Invalid Parameters')
@@ -104,12 +122,17 @@ def main():
     t0 = time.perf_counter()
     args = getArguments()
 
+    # open serial connection to tag
     serial_connection = serial_connect(args['Port'], args['Baudrate'], None)
-    log_handle = log_open()
-
-    if (serial_connection is None or log_handle is None):
+    if (serial_connection is None):
         return 1
 
+    # open log file
+    log_handle = log_open()
+    if (log_handle is None):
+        return 1
+
+    # read serial data and write to log
     try:
         while True:
             line = serial_read_line(serial_connection)
@@ -127,8 +150,9 @@ def main():
             else:
                 continue
             
-            console_out = "\rID {} ({:.2f}): Current={:5.2f}, Mean={:5.2f}m, Stdev={:3.2f}m".format(
-                0, anchorData[0].rate_success, anchorData[0].dist_last, anchorData[0].dist_mean, anchorData[0].dist_stdev
+            console_out = "\rID {} ({:.2f}): Current={:5.2f}, Mean={:5.2f}m, Stdev={:3.2f}m -- ID {} ({:.2f}): Current={:5.2f}, Mean={:5.2f}m, Stdev={:3.2f}m".format(
+                0, anchorData[0].rate_success, anchorData[0].dist_last, anchorData[0].dist_mean, anchorData[0].dist_stdev,
+                1, anchorData[1].rate_success, anchorData[1].dist_last, anchorData[1].dist_mean, anchorData[1].dist_stdev
             )
             sys.stdout.write(console_out)
 
