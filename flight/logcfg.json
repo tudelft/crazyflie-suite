@@ -1,4 +1,44 @@
 {
+    "mavicCurrent":{
+        "name": "mavicCurrent",
+        "type": "CF",
+        "period": 10,
+        "variables": ["mavic.currentPosX",
+                      "mavic.currentPosY",
+                      "mavic.currentPosZ"],
+        "headers": ["currentPosX", "currentPosY", "currentPosZ"]
+    },
+    
+    "mavicDesired":{
+        "name": "mavicDesired",
+        "type": "CF",
+        "period": 10,
+        "variables": ["mavic.desiredPosX",
+                      "mavic.desiredPosY",
+                      "mavic.desiredPosZ"],
+        "headers": ["desiredPosX", "desiredPosY", "desiredPosZ"]
+    },
+    
+    "mavicCommand":{
+        "name": "mavicCommand",
+        "type": "CF",
+        "period": 10,
+        "variables": ["mavic.commandX",
+                      "mavic.commandY",
+                      "mavic.commandZ"],
+        "headers": ["commandX", "commandY", "commandZ"]
+    },
+    
+    "cfCommand":{
+        "name": "cfCommand",
+        "type": "CF",
+        "period": 10,
+        "variables": ["posCtl.targetVX",
+                      "posCtl.targetVY",
+                      "posCtl.targetVZ"],
+        "headers": ["targetVX", "targetVY", "targetVZ"]
+    },
+    
     "twr":{
         "name": "twr",
         "type": "CF",
@@ -78,6 +118,14 @@
         "variables": ["motion.deltaX",
                       "motion.deltaY"],
         "headers": ["flowX", "flowY"]
+    },
+
+    "baro":{
+        "name": "baro",
+        "type": "CF",
+        "period": 10,
+        "variables": ["baro.asl"],
+        "headers": ["baro"]
     },
 
     "MHEout":{

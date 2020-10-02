@@ -79,6 +79,10 @@ def setup_logger(
         flogger.enableConfig("kalman")
         flogger.enableConfig("laser")
         flogger.enableConfig("flow")
+        flogger.enableConfig("mavicCurrent")
+        flogger.enableConfig("mavicDesired")
+        flogger.enableConfig("mavicCommand")
+        flogger.enableConfig("cfCommand")
     elif estimator == "mhe":
         flogger.enableConfig("MHEin")
         flogger.enableConfig("MHEout")
@@ -167,6 +171,8 @@ def do_taskdump(cf):
 
 
 def process_taskdump(file, console_log):
+    print(console_log)
+
     # Dataframe placeholders
     label_data, load_data, stack_data = [], [], []
 

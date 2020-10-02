@@ -1,13 +1,13 @@
-# Space specification file for Cyberzoo
+# Space specification file for greenhouse
 # Home
 home:
-  x: 0.0 
-  y: 0.0
+  x: 3.6
+  y: 2.4
   z: 0.0
 
 # Ranges w.r.t. home
 # x and y are two-sided, z is one-sided
 range:
-  x: 2.0
-  y: 2.0
+  x: 1.0
+  y: 1.0
   z: 1.0
