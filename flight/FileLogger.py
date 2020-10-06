@@ -68,21 +68,21 @@ class FileLogger:
             print('Could not enable config "{}". Config not found.'.format(cfg_name))
 
     def addConfig(self, config):
-        """ Defines and enables a new logconfig
-            @parma[in]: config - a dictionary that defines the properties of the config. Fields:
-            config["name"]: name of the configuration
-            config["type"]: 'CF' (register cf callback) or 'EXT' (data will be updated using the registerData function)
-            config["period"]: for CF callbacks, frequency of data acquisition in ms
-            config["variables"]: names of the variables to log
-            config["headers"]: headers under which the variables appear in the logfile
+        """Defines and enables a new logconfig
+        @parma[in]: config - a dictionary that defines the properties of the config. Fields:
+        config["name"]: name of the configuration
+        config["type"]: 'CF' (register cf callback) or 'EXT' (data will be updated using the registerData function)
+        config["period"]: for CF callbacks, frequency of data acquisition in ms
+        config["variables"]: names of the variables to log
+        config["headers"]: headers under which the variables appear in the logfile
         """
         self._cfg_defs[config["name"]] = config
         self._enabled_configs.append(config["name"])
         # self._external_configs.append(name)
 
     def registerData(self, config, data_dict):
-        """ Register data for an external logconfig. Data dict must contain the fields that
-            correspond to variables of config
+        """Register data for an external logconfig. Data dict must contain the fields that
+        correspond to variables of config
         """
         if config in self._enabled_configs:
             for key, value in data_dict.items():
@@ -98,7 +98,7 @@ class FileLogger:
             print('Could not register data for config "{}": Config not active', config)
 
     def _connected(self, link_uri):
-        """ This callback is called form the Crazyflie API when a Crazyflie
+        """This callback is called form the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""
         print("Connected to %s" % link_uri)
         # add log configs
