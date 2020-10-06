@@ -50,7 +50,7 @@ def create_filename(fileroot, keywords, estimator, uwb, optitrack, trajectory):
 
 
 def setup_logger(
-    cf, uri, fileroot, keywords, logconfig, estimator, uwb, optitrack, trajectory
+    cf, uri, fileroot, keywords, logconfig, estimator, uwb, flow, optitrack, trajectory
 ):
     # Create filename from options and date
     file = create_filename(fileroot, keywords, estimator, uwb, optitrack, trajectory)
@@ -69,7 +69,13 @@ def setup_logger(
     if uwb == "twr":
         flogger.enableConfig("twr")
     elif uwb == "tdoa":
-        flogger.enableConfig("tdoa")
+        print("Needs custom TDoA logging in firmware!")
+        # For instance, see here: https://github.com/Huizerd/crazyflie-firmware/blob/master/src/utils/src/tdoa/tdoaEngine.c
+        # flogger.enableConfig("tdoa")
+    # Flow
+    if flow:
+        flogger.enableConfig("laser")
+        flogger.enableConfig("flow")
     # OptiTrack
     if optitrack != "none":
         flogger.enableConfig("otpos")
@@ -77,12 +83,6 @@ def setup_logger(
     # Estimator
     if estimator == "kalman":
         flogger.enableConfig("kalman")
-        flogger.enableConfig("laser")
-        flogger.enableConfig("flow")
-    elif estimator == "mhe":
-        flogger.enableConfig("MHEin")
-        flogger.enableConfig("MHEout")
-        flogger.enableConfig("MHEstats")
 
     # Start
     flogger.start()
@@ -119,11 +119,6 @@ def reset_estimator(cf, estimator):
         cf.param.set_value("kalman.resetEstimation", "1")
         time.sleep(1)
         cf.param.set_value("kalman.resetEstimation", "0")
-    # MHE
-    elif estimator == "mhe":
-        cf.param.set_value("MHE.resetEstimation", "1")
-        time.sleep(1)
-        cf.param.set_value("MHE.resetEstimation", "0")
 
 
 def receive_new_frame(*args, **kwargs):
@@ -340,13 +335,14 @@ if __name__ == "__main__":
     parser.add_argument("--space", type=str, required=True)
     parser.add_argument(
         "--estimator",
-        choices=["complementary", "kalman", "mhe"],
+        choices=["complementary", "kalman"],
         type=str.lower,
         required=True,
     )
     parser.add_argument(
         "--uwb", choices=["none", "twr", "tdoa"], type=str.lower, required=True
     )
+    parser.add_argument("--flow", action="store_true")
     parser.add_argument("--trajectory", nargs="+", type=str.lower, required=True)
     parser.add_argument(
         "--optitrack",
@@ -358,11 +354,11 @@ if __name__ == "__main__":
     args = vars(parser.parse_args())
 
     # If no UWB, then OptiTrack
+    # If no UWB and Flowdeck, then complementary
     if args["uwb"] == "none":
-        assert (
-            args["estimator"] == "complementary"
-        ), "Absence of UWB will lead Crazyflie to set estimator to 'complementary', unless you put on stuff like a Flowdeck (in which case you can uncomment this and select 'kalman')"
         assert args["optitrack"] == "state", "OptiTrack state needed in absence of UWB"
+        if not args["flow"]:
+            assert args["estimator"] == "complementary", "Absence of UWB and Flowdeck will lead Crazyflie to set estimator to 'complementary'"
 
     # Set up Crazyflie
     uri = "radio://0/80/2M/E7E7E7E7E7"
@@ -387,6 +383,7 @@ if __name__ == "__main__":
         args["logconfig"],
         args["estimator"],
         args["uwb"],
+        args["flow"],
         args["optitrack"],
         args["trajectory"],
     )
