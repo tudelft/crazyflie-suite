@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from enum import Enum
 
+import lps
 import lps_stats
 
 # Experiment data
@@ -39,31 +40,16 @@ def data_bin_init():
                         db[mount][tx_mode][d_true][entry][angle] = [[] for _ in range(N_ANCHORS)]
     return db
 
-# Creates a dictionary with log properties from the log's name
-def log_get_properties(log_name):
-    log_name = log_name.split('.')[0]
-    attribute = log_name.split('_')
-
-    log = dict()
-    log['timestamp'] = attribute[0]
-    log['uwb_mode'] = attribute[1]
-    log['d_true'] = attribute[2]
-    log['tx_mode'] = attribute[3]
-    log['anchor_orientation'] = attribute[4][2]
-    log['anchor_angle'] = attribute[4][3:]
-    log['tag_orientation'] = attribute[5][2]
-    log['tag_angle'] = attribute[5][3:]
-
-    return log
 
 # Filter logs based on properties
-def log_is_good(log_properties):
-    # only retain V0 anchor data over 2 or 7m     
-    if (log_properties['anchor_orientation'] != 'V'
-            or log_properties['anchor_angle'] != '0'):
+def log_is_good(test_params):
+    # only retain twr ranging logs with V0 anchor data over 2 or 7m     
+    if test_params.anchor_orientation != 'A-V0':
         return False
-    elif not (log_properties['d_true'] == '2m' 
-                or log_properties['d_true'] == '7m'):
+    elif not (test_params.nominal_range == '2m' 
+                or test_params.nominal_range == '7m'):
+        return False
+    elif not test_params.test_mode == 'twr-ranging':
         return False
     else:
         return True
@@ -73,32 +59,33 @@ def load_data(data_dir, data_bin):
         # avoid lock files
         if log_name.startswith('.'):
             continue
-
-        log_props = log_get_properties(log_name)
-        if not log_is_good(log_props):
-            continue
         else:
-            mnt = log_props['tag_orientation']
-            ang = log_props['tag_angle']
-            tx = log_props['tx_mode']
-            d = log_props['d_true']
             log_path = os.path.join(data_dir, log_name)
+            params = lps.params_from_logname(log_path)
 
-            with open(log_path, 'r') as log_file:
-                for line in log_file:
-                    # skip header
-                    if 'Time' in line:
-                        continue
-                    else:
-                        items = line.split(',')
-                        t = float(items[0])
-                        idx = int(items[1])
-                        dist = float(items[2])
-                        d_err = dist - int(d[:-1])
+            if not log_is_good(params):
+                continue
+            else:
+                mnt = params.tag_orientation[2]
+                ang = params.tag_orientation[3:]
+                tx = params.tx_mode
+                d = params.nominal_range
+                
+                with open(log_path, 'r') as log_file:
+                    for line in log_file:
+                        # skip header
+                        if 'Time' in line:
+                            continue
+                        else:
+                            items = line.split(',')
+                            t = float(items[0])
+                            idx = int(items[1])
+                            dist = float(items[2])
+                            d_err = dist - int(d[:-1])
 
-                        data_bin[mnt][tx][d]['time'][ang][idx].append(t)
-                        data_bin[mnt][tx][d]['dist'][ang][idx].append(dist)
-                        data_bin[mnt][tx][d]['dist_error'][ang][idx].append(d_err)
+                            data_bin[mnt][tx][d]['time'][ang][idx].append(t)
+                            data_bin[mnt][tx][d]['dist'][ang][idx].append(dist)
+                            data_bin[mnt][tx][d]['dist_error'][ang][idx].append(d_err)
 
 
 def stat_ranging_boxplots(data_bin):
