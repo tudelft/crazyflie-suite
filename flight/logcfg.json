@@ -80,37 +80,6 @@
         "headers": ["flowX", "flowY"]
     },
 
-    "MHEout":{
-        "name": "MHEout",
-        "type": "CF",
-        "period": 10,
-        "variables": ["MHE.exX",
-                      "MHE.exY",
-                      "MHE.exZ"],
-        "headers": ["mheExX", "mheExY", "mheExZ"]
-    },
-
-    "MHEin":{
-        "name": "MHEin",
-        "type": "CF",
-        "period": 10,
-        "variables": ["MHE.uwbQueueX",
-                      "MHE.uwbQueueY",
-                      "MHE.uwbQueueZ"],
-        "headers": ["mheUwbX", "mheUwbY", "mheUwbZ"]
-    },
-
-    "MHEstats":{
-        "name": "MHEstats",
-        "type": "CF",
-        "period": 10,
-        "variables": ["MHE.rtLoop",
-                      "MHE.rtPosUpdate",
-                      "MHE.rtCorrUpdate",
-                      "MHE.rtCall"],
-        "headers": ["mheRateLoop", "mheRatePosUpdate", "mheRateCorrUpdate", "mheRateCall"]
-    },
-
     "state":{
         "name": "state",
         "type": "CF",
