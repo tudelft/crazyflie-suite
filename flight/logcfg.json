@@ -1,6 +1,6 @@
 {
-    "twr":{
-        "name": "twr",
+    "twr0":{
+        "name": "twr0",
         "type": "CF",
         "period": 10,
         "variables": ["ranging.distance0",
@@ -10,17 +10,78 @@
         "headers": ["twr0", "twr1", "twr2", "twr3"]
     },
 
-    "tdoa":{
-        "name": "tdoa",
+    "twr1":{
+        "name": "twr1",
+        "type": "CF",
+        "period": 10,
+        "variables": ["ranging.distance4",
+                      "ranging.distance5",
+                      "ranging.distance6",
+                      "ranging.distance7"],
+        "headers": ["twr4", "twr5", "twr6", "twr7"]
+    },
+
+    "tdoa0":{
+        "name": "tdoa0",
         "type": "CF",
         "period": 10,
         "variables": ["tdoa.diff01",
                       "tdoa.diff02",
                       "tdoa.diff03",
+                      "tdoa.diff04",
+                      "tdoa.diff05",
+                      "tdoa.diff06"],
+        "headers": ["tdoa01", "tdoa02", "tdoa03", "tdoa04", "tdoa05", "tdoa06"]
+    },
+
+    "tdoa1":{
+        "name": "tdoa1",
+        "type": "CF",
+        "period": 10,
+        "variables": ["tdoa.diff07",
                       "tdoa.diff12",
                       "tdoa.diff13",
-                      "tdoa.diff23"],
-        "headers": ["tdoa01", "tdoa02", "tdoa03", "tdoa12", "tdoa13", "tdoa23"]
+                      "tdoa.diff14",
+                      "tdoa.diff15",
+                      "tdoa.diff16"],
+        "headers": ["tdoa07", "tdoa12", "tdoa13", "tdoa14", "tdoa15", "tdoa16"]
+    },
+
+    "tdoa2":{
+        "name": "tdoa2",
+        "type": "CF",
+        "period": 10,
+        "variables": ["tdoa.diff17",
+                      "tdoa.diff23",
+                      "tdoa.diff24",
+                      "tdoa.diff25",
+                      "tdoa.diff26",
+                      "tdoa.diff27"],
+        "headers": ["tdoa17", "tdoa23", "tdoa24", "tdoa25", "tdoa26", "tdoa27"]
+    },
+
+    "tdoa3":{
+        "name": "tdoa3",
+        "type": "CF",
+        "period": 10,
+        "variables": ["tdoa.diff34",
+                      "tdoa.diff35",
+                      "tdoa.diff36",
+                      "tdoa.diff37",
+                      "tdoa.diff45",
+                      "tdoa.diff46"],
+        "headers": ["tdoa34", "tdoa35", "tdoa36", "tdoa37", "tdoa45", "tdoa46"]
+    },
+
+    "tdoa4":{
+        "name": "tdoa4",
+        "type": "CF",
+        "period": 10,
+        "variables": ["tdoa.diff47",
+                      "tdoa.diff56",
+                      "tdoa.diff57",
+                      "tdoa.diff67"],
+        "headers": ["tdoa47", "tdoa56", "tdoa57", "tdoa67"]
     },
 
     "gyros":{
@@ -59,8 +120,24 @@
         "period": 10,
         "variables": ["kalman.stateX",
                       "kalman.stateY",
-                      "kalman.stateZ"],
-        "headers": ["kalX", "kalY", "kalZ"]
+                      "kalman.stateZ",
+                      "kalman.statePX",
+                      "kalman.statePY",
+                      "kalman.statePZ"],
+        "headers": ["kalX", "kalY", "kalZ", "kalPX", "kalPY", "kalPZ"]
+    },
+
+    "mhe":{
+        "name": "mhe",
+        "type": "CF",
+        "period": 10,
+        "variables": ["mhe.stateX_now",
+                      "mhe.stateY_now",
+                      "mhe.stateZ_now",
+                      "mhe.statePX_now",
+                      "mhe.statePY_now",
+                      "mhe.statePZ_now"],
+        "headers": ["mheX", "mheY", "mheZ", "mhePX", "mhePY", "mhePZ"]
     },
     
     "laser":{

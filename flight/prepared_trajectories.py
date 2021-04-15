@@ -35,6 +35,17 @@ def hourglass(x0, y0, side_length, altitude):
     return setpoints
 
 
+def star(x0, y0, radius, altitude):
+    polypoints = xy_polygon(x0, y0, 5, radius, altitude, 0.0)
+    setpoints = []
+    setpoints.append(polypoints[0])
+    setpoints.append(polypoints[2])
+    setpoints.append(polypoints[4])
+    setpoints.append(polypoints[1])
+    setpoints.append(polypoints[3])
+    setpoints.append(polypoints[0])
+    return setpoints
+
 def randoms(x0, y0, x_bound, y_bound, altitude):
     setpoints = []
     points = 10

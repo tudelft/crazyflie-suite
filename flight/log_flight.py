@@ -64,14 +64,19 @@ def setup_logger(
     flogger.enableConfig("attitude")
     flogger.enableConfig("gyros")
     flogger.enableConfig("acc")
-    flogger.enableConfig("state")
+    #flogger.enableConfig("state")
     # UWB
     if uwb == "twr":
-        flogger.enableConfig("twr")
+        flogger.enableConfig("twr0")
+        flogger.enableConfig("twr1")
     elif uwb == "tdoa":
         print("Needs custom TDoA logging in firmware!")
         # For instance, see here: https://github.com/Huizerd/crazyflie-firmware/blob/master/src/utils/src/tdoa/tdoaEngine.c
-        # flogger.enableConfig("tdoa")
+        flogger.enableConfig("tdoa0")
+        flogger.enableConfig("tdoa1")
+        flogger.enableConfig("tdoa2")
+        flogger.enableConfig("tdoa3")
+        flogger.enableConfig("tdoa4")
     # Flow
     if flow:
         flogger.enableConfig("laser")
@@ -83,6 +88,8 @@ def setup_logger(
     # Estimator
     if estimator == "kalman":
         flogger.enableConfig("kalman")
+    elif estimator == "mhe":
+        flogger.enableConfig("mhe")
 
     # Start
     flogger.start()
@@ -119,6 +126,11 @@ def reset_estimator(cf, estimator):
         cf.param.set_value("kalman.resetEstimation", "1")
         time.sleep(1)
         cf.param.set_value("kalman.resetEstimation", "0")
+    elif estimator =="mhe":
+        cf.param.set_value("mhe.resetEstimation", "1")
+        time.sleep(1)
+        cf.param.set_value("mhe.resetEstimation", "0")
+
 
 
 def receive_new_frame(*args, **kwargs):
@@ -242,6 +254,8 @@ def build_trajectory(trajectories, space):
             setpoints += randoms(home["x"], home["y"], x_bound, y_bound, altitude)
         elif trajectory == "scan":
             setpoints += scan(home["x"], home["y"], x_bound, y_bound, altitude)
+        elif trajectory == "star":
+            setpoints += star(home["x"], home["y"], radius, altitude)
         else:
             raise ValueError(f"{trajectory} is an unknown trajectory")
 
@@ -335,7 +349,7 @@ if __name__ == "__main__":
     parser.add_argument("--space", type=str, required=True)
     parser.add_argument(
         "--estimator",
-        choices=["complementary", "kalman"],
+        choices=["complementary", "kalman", "mhe"],
         type=str.lower,
         required=True,
     )
