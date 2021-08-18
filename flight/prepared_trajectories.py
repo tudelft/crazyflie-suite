@@ -15,8 +15,20 @@ def hover(x0, y0, altitude):
     return setpoints
 
 
+def hover_fw(x0, y0, altitude):
+    setpoints = []
+    for _ in range(9):
+        setpoints += takeoff(x0, y0, altitude, 90.0)
+    return setpoints
+
+
 def square(x0, y0, side_length, altitude):
     setpoints = xy_square(x0, y0, side_length, altitude, 0.0)
+    return setpoints
+
+
+def square_fw(x0, y0, side_length, altitude):
+    setpoints = xy_square_fw(x0, y0, side_length, altitude, 0.0)
     return setpoints
 
 

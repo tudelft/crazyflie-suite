@@ -230,8 +230,12 @@ def build_trajectory(trajectories, space):
             return setpoints
         elif trajectory == "hover":
             setpoints += hover(home["x"], home["y"], altitude)
+        elif trajectory == "hover_fw":
+            setpoints += hover_fw(home["x"], home["y"], altitude)
         elif trajectory == "square":
             setpoints += square(home["x"], home["y"], side_length, altitude)
+        elif trajectory == "square_fw":
+            setpoints += square_fw(home["x"], home["y"], side_length, altitude)
         elif trajectory == "octagon":
             setpoints += octagon(home["x"], home["y"], radius, altitude)
         elif trajectory == "triangle":
@@ -282,7 +286,9 @@ def follow_setpoints(cf, setpoints, optitrack):
                 # No take-off
                 else:
                     distance = np.sqrt(
-                        ((np.array(point) - np.array(setpoints[i - 1])) ** 2).sum()
+                        (
+                            (np.array(point[:3]) - np.array(setpoints[i - 1][:3])) ** 2
+                        ).sum()
                     )
 
                 # If zero distance, at least some wait time

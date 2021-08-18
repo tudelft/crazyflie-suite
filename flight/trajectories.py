@@ -55,6 +55,26 @@ def xy_square(x0, y0, side_length, altitude, yaw):
     return setpoints
 
 
+def xy_square_fw(x0, y0, side_length, altitude, yaw0):
+    x_min = x0 - side_length / 2
+    x_max = x0 + side_length / 2
+    y_min = y0 - side_length / 2
+    y_max = y0 + side_length / 2
+
+    setpoints = [
+        (x_min, y_min, altitude, yaw0),
+        (x_min, y_min, altitude, yaw0 + 90),
+        (x_min, y_max, altitude, yaw0 + 90),
+        (x_min, y_max, altitude, yaw0),
+        (x_max, y_max, altitude, yaw0),
+        (x_max, y_max, altitude, yaw0 - 90),
+        (x_max, y_min, altitude, yaw0 - 90),
+        (x_max, y_min, altitude, yaw0),
+    ]
+
+    return setpoints
+
+
 def xy_hourglass(x0, y0, side_length, altitude, yaw):
     x_min = x0 - side_length / 2
     x_max = x0 + side_length / 2
