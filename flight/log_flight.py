@@ -363,10 +363,11 @@ if __name__ == "__main__":
     # If no UWB and Flowdeck, then complementary
     if args["uwb"] == "none":
         assert args["optitrack"] == "state", "OptiTrack state needed in absence of UWB"
+        assert args["estimator"] == "kalman", "OptiTrack state needs Kalman estimator"
         if not args["flow"]:
-            assert (
-                args["estimator"] == "complementary"
-            ), "Absence of UWB and Flowdeck will lead Crazyflie to set estimator to 'complementary'"
+            print(
+                "Absence of UWB and Flowdeck will lead Crazyflie to set estimator to 'complementary', make sure you force it to 'kalman' in config.mk"
+            )
 
     # Set up Crazyflie
     uri = "radio://0/80/2M/E7E7E7E7E7"
