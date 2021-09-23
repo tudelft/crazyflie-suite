@@ -359,16 +359,6 @@ if __name__ == "__main__":
     parser.add_argument("--optitrack_id", type=int, default=None)
     args = vars(parser.parse_args())
 
-    # If no UWB, then OptiTrack
-    # If no UWB and Flowdeck, then complementary
-    if args["uwb"] == "none":
-        assert args["optitrack"] == "state", "OptiTrack state needed in absence of UWB"
-        assert args["estimator"] == "kalman", "OptiTrack state needs Kalman estimator"
-        if not args["flow"]:
-            print(
-                "Absence of UWB and Flowdeck will lead Crazyflie to set estimator to 'complementary', make sure you force it to 'kalman' in config.mk"
-            )
-
     # Set up Crazyflie
     uri = "radio://0/80/2M/E7E7E7E7E7"
     cflib.crtp.init_drivers(enable_debug_driver=False)
@@ -407,6 +397,17 @@ if __name__ == "__main__":
             print("Waiting for OptiTrack fix...")
             time.sleep(1)
         print("OptiTrack fix acquired")
+
+    # If no UWB, then OptiTrack
+    # If no UWB and Flowdeck, then complementary
+    if args["uwb"] == "none":
+        assert args["optitrack"] == "state", "OptiTrack state needed in absence of UWB"
+        assert args["estimator"] == "kalman", "OptiTrack state needs Kalman estimator"
+        if not args["flow"]:
+            print(
+                "Absence of UWB and Flowdeck will lead Crazyflie to set estimator to 'complementary', so we set it manually to 'kalman'"
+            )
+            cf.param.set_value("stabilizer.estimator", "2")
 
     # Reset estimator
     reset_estimator(cf, args["estimator"])
