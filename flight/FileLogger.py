@@ -17,16 +17,10 @@ class FileLogger:
     external config.
     """
 
-    def __init__(self, crazyflie, link_uri, configName, fileName):
+    def __init__(self, crazyflie, configName, fileName):
         """ Initialize and run the example with the specified link_uri """
         self._cf = crazyflie
-        self._link_uri = link_uri
         self.is_connected = False
-        # Connect some callbacks from the Crazyflie API
-        self._cf.connected.add_callback(self._connected)
-        self._cf.disconnected.add_callback(self._disconnected)
-        self._cf.connection_failed.add_callback(self._connection_failed)
-        self._cf.connection_lost.add_callback(self._connection_lost)
 
         # import log configs from logcfg.json
         with open(configName) as json_config_file:
@@ -49,14 +43,22 @@ class FileLogger:
         self._logfile.close()
 
     def start(self):
-        """ Commits the logging configurations and connects to the crazyflie"""
-        self._open_log_file()
-        print("Connecting to %s" % self._link_uri)  # Try to connect to the Crazyflie
-        self._cf.open_link(self._link_uri)
-        self.is_connected = (
-            True  # Variable used to keep main loop occupied until disconnect
-        )
-        time.sleep(4)  # wait sometime for connection
+        """ Commits the logging configurations and adds them to the 
+        Crazyflie. Call AFTER the cf is connected."""
+        if not self._cf.is_connected():
+            print("Could not start logging, crazyflie not connected")
+        else:
+            self.is_connected = True
+            self._open_log_file()
+            # add log configs to cf
+            counter = 0
+            for cfg_name in self._enabled_configs:
+                cfg = self._cfg_defs[cfg_name]
+                if cfg["type"] == "CF":
+                    self._add_cf_log_config(cfg_name, counter)
+                    counter = counter + 1
+                else:
+                    print('Log config "{}" added'.format(cfg_name))
 
     def enableConfig(self, cfg_name):
         """ Enable a config defined in logcfg.json"""
@@ -96,31 +98,6 @@ class FileLogger:
                     )
         else:
             print('Could not register data for config "{}": Config not active', config)
-
-    def _connected(self, link_uri):
-        """This callback is called form the Crazyflie API when a Crazyflie
-        has been connected and the TOCs have been downloaded."""
-        print("Connected to %s" % link_uri)
-        # add log configs
-        counter = 0
-        for cfg_name in self._enabled_configs:
-            cfg = self._cfg_defs[cfg_name]
-            if cfg["type"] == "CF":
-                self._add_cf_log_config(cfg_name, counter)
-                counter = counter + 1
-            else:
-                print('Log config "{}" added'.format(cfg_name))
-
-    def _connection_failed(self, link_uri, msg):
-        print("Connection to %s failed: %s" % (link_uri, msg))
-        self.is_connected = False
-
-    def _connection_lost(self, link_uri, msg):
-        print("Connection to %s lost: %s" % (link_uri, msg))
-
-    def _disconnected(self, link_uri):
-        print("Disconnected from %s" % link_uri)
-        self.is_connected = False
 
     def _add_cf_log_config(self, cfg_name, cfg_id):
         config = self._cfg_defs[cfg_name]

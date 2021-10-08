@@ -5,6 +5,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "cflib",
+        "cfclient",
         "numpy",
         "pandas",
         "matplotlib",
