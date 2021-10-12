@@ -86,8 +86,9 @@
         "period": 10,
         "variables": ["stateEstimate.x",
                       "stateEstimate.y",
-                      "stateEstimate.z"],
-        "headers": ["stateX", "stateY", "stateZ"]
+                      "stateEstimate.z",
+                      "stateEstimate.yaw"],
+        "headers": ["stateX", "stateY", "stateZ", "stateYaw"]
     },
 
     "otpos":{
