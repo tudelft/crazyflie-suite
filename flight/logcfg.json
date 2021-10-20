@@ -1,6 +1,6 @@
 {
-    "twr":{
-        "name": "twr",
+    "twr0":{
+        "name": "twr0",
         "type": "CF",
         "period": 10,
         "variables": ["ranging.distance0",
@@ -10,8 +10,17 @@
         "headers": ["twr0", "twr1", "twr2", "twr3"]
     },
 
-    "tdoa":{
-        "name": "tdoa",
+    "twr1":{
+        "name": "twr1",
+        "type": "CF",
+        "period": 10,
+        "variables": ["ranging.distance4",
+                      "ranging.distance5",
+                      "ranging.distance6",
+                      "ranging.distance7"],
+        "headers": ["twr4", "twr5", "twr6", "twr7"]
+    },
+
         "type": "CF",
         "period": 10,
         "variables": ["tdoa.diff01",
@@ -59,8 +68,12 @@
         "period": 10,
         "variables": ["kalman.stateX",
                       "kalman.stateY",
-                      "kalman.stateZ"],
-        "headers": ["kalX", "kalY", "kalZ"]
+                      "kalman.stateZ",
+                      "kalman.statePX",
+                      "kalman.statePY",
+                      "kalman.statePZ"],
+        "headers": ["kalX", "kalY", "kalZ", "kalPX", "kalPY", "kalPZ"]
+    },
     },
     
     "laser":{
@@ -92,7 +105,15 @@
                       "stateEstimate.vz"],
         "headers": ["stateX", "stateY", "stateZ", "stateVX", "stateVY", "stateVZ"]
     },
+
+    "barometer":{
+        "name": "barometer",
+        "type": "CF",
+        "period": 10,
+        "variables": ["baro.asl"],
+        "headers": ["baro asl"]
     },
+
 
     "otpos":{
         "name": "otpos",
@@ -110,7 +131,12 @@
         "period": 10,
         "variables": ["otRoll",
                       "otPitch",
-                      "otYaw"],
-        "headers": ["otRoll", "otPitch", "otYaw"]
+                      "otYaw",
+                      "otq0",
+                      "otq1",
+                      "otq2",
+                      "otq3"],
+        "headers": ["otRoll", "otPitch", "otYaw", "otq0", "otq1", "otq2", "otq3"]
+    },
     }
 }
