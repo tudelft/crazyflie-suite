@@ -13,6 +13,7 @@ import pandas as pd
 import os
 import sys
 import enum
+import scipy.signal
 
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
@@ -138,13 +139,17 @@ class LogFlight():
         if self.args["estimator"] == "kalman":
             self.flogger.enableConfig("kalman")
 
-
     def setup_optitrack(self):
         self.ot_id = self.args["optitrack_id"]
         self.ot_position = np.zeros(3)
         self.ot_attitude = np.zeros(3)
         self.ot_quaternion = np.zeros(4)
-
+        self.filtered_pos = np.zeros(3)
+        self.ot_filter_sos = scipy.signal.butter(N=4, Wn=0.1, btype='low',
+                                            analog=False, output='sos')
+        self.pos_filter_zi = [scipy.signal.sosfilt_zi(self.ot_filter_sos),
+                              scipy.signal.sosfilt_zi(self.ot_filter_sos),
+                              scipy.signal.sosfilt_zi(self.ot_filter_sos)]
         # Streaming client in separate thread
         streaming_client = NatNetClient()
         streaming_client.newFrameListener = self.ot_receive_new_frame
@@ -162,7 +167,14 @@ class LogFlight():
             self._cf.param.set_value("kalman.resetEstimation", "1")
             time.sleep(1)
             self._cf.param.set_value("kalman.resetEstimation", "0")
-
+        # Complementary (needs changes to firmware)
+        if self.args["estimator"] == "complementary":
+            try:
+                self._cf.param.set_value("complementaryFilter.reset", "1")
+                time.sleep(1)
+                self._cf.param.set_value("complementaryFilter.reset", "0")
+            except:
+                pass
     def ot_receive_new_frame(self, *args, **kwargs):
         pass
 
@@ -177,6 +189,16 @@ class LogFlight():
                 "otZ": self.ot_position[2],
             }
             self.flogger.registerData("otpos", ot_pos_dict)
+            # filter ot position for drone input
+            (self.filtered_pos[0], self.pos_filter_zi[0]) = scipy.signal.sosfilt(
+                self.ot_filter_sos, [self.ot_position[0]], zi=self.pos_filter_zi[0]
+            )
+            (self.filtered_pos[1], self.pos_filter_zi[1]) = scipy.signal.sosfilt(
+                self.ot_filter_sos, [self.ot_position[1]], zi=self.pos_filter_zi[1]
+            )
+            (self.filtered_pos[2], self.pos_filter_zi[2]) = scipy.signal.sosfilt(
+                self.ot_filter_sos, [self.ot_position[2]], zi=self.pos_filter_zi[2]
+            )
 
             # Register attitude
             self.ot_attitude = util.quat2euler(rotation)
@@ -379,9 +401,16 @@ class LogFlight():
         self.is_in_manual_control = True
         while(self.is_in_manual_control):
             if self.args["optitrack"]=="state":
+                # self._cf.extpos.send_extpos(
+                #     self.filtered_pos[0], self.filtered_pos[1], self.filtered_pos[2]
+                #     )
                 self._cf.extpos.send_extpos(
                     self.ot_position[0], self.ot_position[1], self.ot_position[2]
                     )
+                # self._cf.extpos.send_extpose(
+                #     self.ot_position[0], self.ot_position[1], self.ot_position[2],
+                #     self.ot_quaternion[0], self.ot_quaternion[1], self.ot_quaternion[2], self.ot_quaternion[3]
+                #     )
             time.sleep(0.01)
 
     def build_trajectory(self, trajectories, space):
