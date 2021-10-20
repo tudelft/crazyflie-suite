@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import os
 import sys
+import enum
 
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
@@ -26,6 +27,11 @@ from flight.NatNetClient import NatNetClient
 from flight.trajectories import takeoff, landing
 from flight.prepared_trajectories import *
 
+class Mode(enum.Enum):
+    MANUAL = 1
+    AUTO = 2
+    MODE_SWITCH = 3
+
 class LogFlight():
     def __init__(self, args):
         self.args = args
@@ -36,25 +42,26 @@ class LogFlight():
         self._cf = Crazyflie(rw_cache="./cache")
         self._jr = JoystickReader(do_device_discovery=False)
 
-        # Set flight mode (manual/autonomous)
+        # Set flight mode
         if self.args["trajectory"][0] == "manual": 
-            # Check if controller is connected
-            assert self.controller_connected(), "No controller detected for manual flight."
-            self.setup_controller()
-            self.manual_flight = True
+            self.mode = Mode.MANUAL
+        elif self.args["safetypilot"]:
+            self.mode = Mode.MODE_SWITCH
         else:
+            self.mode = Mode.AUTO
+        
+        # Setup for specified mode
+        if self.mode == Mode.AUTO:
+            self.is_in_manual_control = False
             # Make sure drone is setup to perform autonomous flight
             if args["uwb"] == "none":
                 assert args["optitrack"] == "state", "OptiTrack state needed in absence of UWB"
                 assert args["estimator"] == "kalman", "OptiTrack state needs Kalman estimator"
-            self.manual_flight = False
-
-        # set estimator to kalman in absence of UWB and Flowdeck
-        if args["uwb"]=="none" and not args["flow"] and args["estimator"]=="kalman":
-            print(
-                "Absence of UWB and Flowdeck will lead Crazyflie to set estimator to 'complementary', so we set it manually to 'kalman'"
-            )
-            self._cf.param.set_value("stabilizer.estimator", "2")
+        else:
+            # Check if controller is connected
+            assert self.controller_connected(), "No controller detected."
+            self.setup_controller(map="flappy")
+            self.is_in_manual_control = True
 
         # Setup the logging framework
         self.setup_logger()
@@ -234,6 +241,149 @@ class LogFlight():
             print("No task dump data found")
 
 
+    def controller_connected(self):
+        """ Return True if a controller is connected """
+        return len(self._jr.available_devices()) > 0
+
+    def setup_controller(self, map="PS3_Mode_1"):
+        devs = []
+        for d in self._jr.available_devices():
+            devs.append(d.name)
+        
+        if len(devs)==1:
+            input_device = 0
+        else:
+            print("Multiple controllers detected:")
+            for i, dev in enumerate(devs):
+                print(" - Controller #{}: {}".format(i, dev))
+            
+            input_device = int(input("Select controller: "))
+
+        if not input_device in range(len(devs)):
+            raise ValueError
+        
+        self._jr.start_input(devs[input_device])
+        self._jr.set_input_map(devs[input_device], map)
+
+    def connect_crazyflie(self, uri):   
+        """Connect to a Crazyflie on the given link uri"""
+        # Connect some callbacks from the Crazyflie API
+        self._cf.connected.add_callback(self._connected)
+        self._cf.disconnected.add_callback(self._disconnected)
+        self._cf.connection_failed.add_callback(self._connection_failed)
+        self._cf.connection_lost.add_callback(self._connection_lost)
+
+        if self.mode == Mode.AUTO:
+            self._cf.open_link(uri)
+        else:
+            # Add callbacks for manual control
+            self._cf.param.add_update_callback(
+                group="imu_sensors", name="AK8963", cb=(
+                    lambda name, found: self._jr.set_alt_hold_available(
+                        eval(found))))
+            self._jr.assisted_control_updated.add_callback(
+                lambda enabled: self._cf.param.set_value("flightmode.althold",
+                                                     enabled))
+            self._cf.open_link(uri)
+            self._jr.input_updated.add_callback(self.controller_input_cb)
+            
+            if self.mode == Mode.MODE_SWITCH:
+                self._jr.alt1_updated.add_callback(self.mode_switch_cb)
+
+
+    def _connected(self, link):
+        """This callback is called form the Crazyflie API when a Crazyflie
+        has been connected and the TOCs have been downloaded."""
+        print("Connected to %s" % link)
+        # set estimator
+        if args["estimator"]=="kalman":
+            self._cf.param.set_value("stabilizer.estimator", "2")
+        self.flogger.start()
+        print("logging started")
+
+    def _connection_failed(self, link_uri, msg):
+        print("Connection to %s failed: %s" % (link_uri, msg))
+        self.flogger.is_connected = False
+
+    def _connection_lost(self, link_uri, msg):
+        print("Connection to %s lost: %s" % (link_uri, msg))
+        self.flogger.is_connected = False
+
+    def _disconnected(self, link_uri):
+        print("Disconnected from %s" % link_uri)
+        self.flogger.is_connected = False
+
+    def ready_to_fly(self):
+        # Wait for connection
+        timeout = 10
+        while not self._cf.is_connected():
+            print("Waiting for Crazyflie connection...")
+            time.sleep(2)
+            timeout -= 1
+            if timeout<=0:
+                return False
+        
+        # Wait for optitrack
+        if self.optitrack_enabled:
+            while (self.ot_position == 0).any():
+                print("Waiting for OptiTrack fix...")
+                time.sleep(2)
+                timeout -= 1
+                if timeout <= 0:
+                    return False
+
+            print("OptiTrack fix acquired")
+
+        print("Reset Estimator...")
+        self.reset_estimator()
+        time.sleep(2)   # wait for kalman to stabilize
+
+        return True
+        
+    def start_flight(self):
+        if self.ready_to_fly():
+            if self.mode == Mode.MANUAL:
+                print("Manual Flight - Ready to fly")
+                self.manual_flight()
+            else:
+                # Build trajectory
+                setpoints = self.build_trajectory(self.args["trajectory"], self.args["space"])
+                # Do flight
+                if self.mode == Mode.AUTO:
+                    print("Autonomous Flight - Starting flight")
+                    self.follow_setpoints(self._cf, setpoints, self.args["optitrack"])
+                    print("Flight complete.")
+                else:
+                    print("Ready to fly")
+                    self.manual_flight()
+                    print("Starting Trajectory")
+                    self.follow_setpoints(self._cf, setpoints, self.args["optitrack"])
+
+        else:
+            print("Timeout while waiting for flight ready.")
+
+    def controller_input_cb(self, *data):
+        # only forward control in manual mode
+        if self.is_in_manual_control:
+            self._cf.commander.send_setpoint(*data)
+
+    def mode_switch_cb(self, auto_mode):
+        if auto_mode:
+            print("Switching autonomous flight")
+            self.is_in_manual_control = False
+        else:
+            print("Switching to manual control")
+            self.is_in_manual_control = True
+
+    def manual_flight(self):
+        self.is_in_manual_control = True
+        while(self.is_in_manual_control):
+            if self.args["optitrack"]=="state":
+                self._cf.extpos.send_extpos(
+                    self.ot_position[0], self.ot_position[1], self.ot_position[2]
+                    )
+            time.sleep(0.01)
+
     def build_trajectory(self, trajectories, space):
         # Load yaml file with space specification
         with open(space, "r") as f:
@@ -326,6 +476,8 @@ class LogFlight():
                     # Send position and wait
                     time_passed = 0.0
                     while time_passed < wait:
+                        if self.is_in_manual_control:
+                            self.manual_flight()
                         # If we use OptiTrack for control, send position to Crazyflie
                         if optitrack == "state":
                             cf.extpos.send_extpos(
@@ -356,119 +508,6 @@ class LogFlight():
                 time.sleep(wait)
                 cf.commander.send_stop_setpoint()
 
-    def controller_connected(self):
-        """ Return True if a controller is connected """
-        return len(self._jr.available_devices()) > 0
-
-    def setup_controller(self, map="PS3_Mode_1"):
-        devs = []
-        for d in self._jr.available_devices():
-            devs.append(d.name)
-        
-        if len(devs)==1:
-            input_device = 0
-        else:
-            print("Multiple controllers detected:")
-            for i, dev in enumerate(devs):
-                print(" - Controller #{}: {}".format(i, dev))
-            
-            input_device = int(input("Select controller: "))
-
-        if not input_device in range(len(devs)):
-            raise ValueError
-        
-        self._jr.start_input(devs[input_device])
-        self._jr.set_input_map(devs[input_device], map)
-
-    def connect_crazyflie(self, uri):   
-        """Connect to a Crazyflie on the given link uri"""
-        # Connect some callbacks from the Crazyflie API
-        self._cf.connected.add_callback(self._connected)
-        self._cf.disconnected.add_callback(self._disconnected)
-        self._cf.connection_failed.add_callback(self._connection_failed)
-        self._cf.connection_lost.add_callback(self._connection_lost)
-
-        if self.manual_flight:
-            # Add callbacks for manual control
-            self._cf.param.add_update_callback(
-                group="imu_sensors", name="AK8963", cb=(
-                    lambda name, found: self._jr.set_alt_hold_available(
-                        eval(found))))
-            self._jr.assisted_control_updated.add_callback(
-                lambda enabled: self._cf.param.set_value("flightmode.althold",
-                                                     enabled))
-            self._cf.open_link(uri)
-            self._jr.input_updated.add_callback(self._cf.commander.send_setpoint)
-
-        else:
-            self._cf.open_link(uri)
-
-    def _connected(self, link):
-        """This callback is called form the Crazyflie API when a Crazyflie
-        has been connected and the TOCs have been downloaded."""
-        print("Connected to %s" % link)
-        self.flogger.start()
-        print("logging started")
-
-    def _connection_failed(self, link_uri, msg):
-        print("Connection to %s failed: %s" % (link_uri, msg))
-        self.flogger.is_connected = False
-
-    def _connection_lost(self, link_uri, msg):
-        print("Connection to %s lost: %s" % (link_uri, msg))
-        self.flogger.is_connected = False
-
-    def _disconnected(self, link_uri):
-        print("Disconnected from %s" % link_uri)
-        self.flogger.is_connected = False
-
-    def ready_to_fly(self):
-        # Wait for connection
-        timeout = 10
-        while not self._cf.is_connected():
-            print("Waiting for Crazyflie connection...")
-            time.sleep(2)
-            timeout -= 1
-            if timeout<=0:
-                return False
-        
-        # Wait for optitrack
-        if self.optitrack_enabled:
-            while (self.ot_position == 0).any():
-                print("Waiting for OptiTrack fix...")
-                time.sleep(2)
-                timeout -= 1
-                if timeout <= 0:
-                    return False
-
-            print("OptiTrack fix acquired")
-
-        print("Reset Estimator...")
-        self.reset_estimator()
-
-        return True
-        
-    def start_flight(self):
-        if self.ready_to_fly():
-            if self.manual_flight:
-                print("Manual Flight - Ready to fly")
-                while(True):
-                    # self._cf.extpos.send_extpose(
-                    #     self.ot_position[0], self.ot_position[1], self.ot_position[2],
-                    #     self.ot_quaternion[0], self.ot_quaternion[1], self.ot_quaternion[2], self.ot_quaternion[3]
-                    #     )
-                    time.sleep(0.01)
-            else:
-                setpoints = self.build_trajectory(args["trajectory"], args["space"])
-                print("Autonomous Flight - Starting flight")
-                # Build trajectory
-                # Do flight
-                print("flying...")
-                self.follow_setpoints(self._cf, setpoints, args["optitrack"])
-                print("Flight complete.")
-        
-        else:
-            print("Timeout while waiting for flight ready.")
 
     def setup_console_dump(self):
         # Console dump file
@@ -506,6 +545,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--flow", action="store_true")
     parser.add_argument("--trajectory", nargs="+", type=str.lower, required=True)
+    parser.add_argument("--safetypilot", action="store_true")
     parser.add_argument(
         "--optitrack",
         choices=["none", "logging", "state"],
@@ -520,7 +560,7 @@ if __name__ == "__main__":
     lf.connect_crazyflie("radio://0/80/2M/E8E7E7E7E8")
     # Set up print connection to console
     # TODO: synchronize this with FileLogger: is this possible?
-    # lf.setup_console_dump()
+    lf.setup_console_dump()
 
     try:
         lf.start_flight()

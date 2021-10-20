@@ -52,3 +52,12 @@ def ot2control(vector_3d_ot):
     vector_3d_ctrl[2] = vector_3d_ot[1]  # CONTROL.z = OT.y
 
     return vector_3d_ctrl
+
+def ot2control_quat(quaternion_4d_ot):
+    quaternion_4d_ctrl = np.zeros(4)
+    quaternion_4d_ctrl[0] = quaternion_4d_ot[2] # CONTROL.x = OT.z
+    quaternion_4d_ctrl[1] = quaternion_4d_ot[0] # CONTROL.y = OT.x
+    quaternion_4d_ctrl[2] = quaternion_4d_ot[1] # CONTROL.z = OT.y
+    quaternion_4d_ctrl[3] = quaternion_4d_ot[3]
+    
+    return quaternion_4d_ctrl
