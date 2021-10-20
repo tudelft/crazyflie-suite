@@ -8,12 +8,13 @@ fi
 
 # Run
 python flight/log_flight.py \
-    --fileroot data \
-    --keywords cyberzoo \
+    --fileroot data/20211019 \
+    --filename model\
     --logconfig flight/logcfg.json \
     --space flight/space_cyberzoo.yaml \
-    --estimator kalman \
-    --uwb twr \
-    --trajectory square square \
+    --estimator complementary \
+    --uwb none \
+    --trajectory manual\
+    --safetypilot \
     --optitrack logging \
     --optitrack_id 1

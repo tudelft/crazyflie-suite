@@ -72,34 +72,48 @@ class LogFlight():
             self.setup_optitrack()
 
     def get_filename(self):
-        # get relevant arguments
         fileroot = self.args["fileroot"] 
-        keywords = self.args["keywords"]
-        estimator = self.args["estimator"]
-        uwb = self.args["uwb"]
-        optitrack = self.args["optitrack"]
-        trajectory = self.args["trajectory"]
+        
+        if self.args["filename"] is not None:
+            name = self.args["filename"] + ".csv"
+            fname = os.path.normpath(os.path.join(
+                os.getcwd(), fileroot, name))
+            i = 0
+            while os.path.isfile(fname):
+                i = i + 1
+                name = self.args["filename"] + "_" + str(i) + ".csv"
+                fname = os.path.normpath(os.path.join(
+                    os.getcwd(), fileroot, name))
 
-        # Date
-        date = datetime.today().strftime(r"%Y-%m-%d+%H:%M:%S")
-
-        # Additional keywords
-        if keywords is not None:
-            keywords = "+" + "+".join(keywords)
         else:
-            keywords = ""
+            # get relevant arguments
+            keywords = self.args["keywords"]
+            estimator = self.args["estimator"]
+            uwb = self.args["uwb"]
+            optitrack = self.args["optitrack"]
+            trajectory = self.args["trajectory"]
 
-        # Options
-        if optitrack == "logging":
-            options = f"{estimator}+{uwb}{keywords}+optitracklog+{'_'.join(trajectory)}"
-        elif optitrack == "state":
-            options = f"{estimator}+{uwb}{keywords}+optitrackstate+{'_'.join(trajectory)}"
-        else:
-            options = f"{estimator}+{uwb}{keywords}+{'_'.join(trajectory)}"
+            # Date
+            date = datetime.today().strftime(r"%Y-%m-%d+%H:%M:%S")
 
-        # Join
-        name = "{}+{}.csv".format(date, options)
-        return os.path.normpath(os.path.join(os.getcwd(), fileroot, name))
+            # Additional keywords
+            if keywords is not None:
+                keywords = "+" + "+".join(keywords)
+            else:
+                keywords = ""
+
+            # Options
+            if optitrack == "logging":
+                options = f"{estimator}+{uwb}{keywords}+optitracklog+{'_'.join(trajectory)}"
+            elif optitrack == "state":
+                options = f"{estimator}+{uwb}{keywords}+optitrackstate+{'_'.join(trajectory)}"
+            else:
+                options = f"{estimator}+{uwb}{keywords}+{'_'.join(trajectory)}"
+
+            # Join
+            name = "{}+{}.csv".format(date, options)
+            fname = os.path.normpath(os.path.join(os.getcwd(), fileroot, name))
+        return fname
 
 
     def setup_logger(self):
@@ -582,6 +596,7 @@ if __name__ == "__main__":
         default="none",
     )
     parser.add_argument("--optitrack_id", type=int, default=None)
+    parser.add_argument("--filename", type=str, default=None)
     args = vars(parser.parse_args())
 
     # Set up log flight
