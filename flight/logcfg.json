@@ -109,5 +109,35 @@
                       "otPitch",
                       "otYaw"],
         "headers": ["otRoll", "otPitch", "otYaw"]
+    },
+
+    "battery":{
+        "name": "battery",
+        "type": "CF",
+        "period": 10,
+        "variables": ["pm.vbat"],
+        "headers": ["voltage"]
+    },
+
+    "pwm_raw":{
+        "name": "pwm_raw",
+        "type": "CF",
+        "period": 10,
+        "variables": ["motor.m1",
+                      "motor.m2",
+                      "motor.m3",
+                      "motor.m4"],
+        "headers": ["pwm_raw_m1", "pwm_raw_m2", "pwm_raw_m3", "pwm_raw_m4"]
+    },
+
+    "pwm_comp":{
+        "name": "pwm_comp",
+        "type": "CF",
+        "period": 10,
+        "variables": ["pwm.m1_pwm",
+                      "pwm.m2_pwm",
+                      "pwm.m3_pwm",
+                      "pwm.m4_pwm"],
+        "headers": ["pwm_comp_m1", "pwm_comp_m2", "pwm_comp_m3", "pwm_comp_m4"]
     }
 }

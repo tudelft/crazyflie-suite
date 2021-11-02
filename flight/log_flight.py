@@ -65,6 +65,9 @@ def setup_logger(
     flogger.enableConfig("gyros")
     flogger.enableConfig("acc")
     flogger.enableConfig("state")
+    flogger.enableConfig("battery")
+    flogger.enableConfig("pwm_raw")
+    flogger.enableConfig("pwm_comp")
     # UWB
     if uwb == "twr":
         flogger.enableConfig("twr")
@@ -91,7 +94,7 @@ def setup_logger(
     return flogger, file
 
 
-def setup_optitrack(optitrack):
+def setup_optitrack(optitrack, frame_cb, rigidbody_cb):
     # If we don't use OptiTrack
     if optitrack == "none":
         ot_position = None
@@ -104,8 +107,8 @@ def setup_optitrack(optitrack):
 
         # Streaming client in separate thread
         streaming_client = NatNetClient()
-        streaming_client.newFrameListener = receive_new_frame
-        streaming_client.rigidBodyListener = receive_rigidbody_frame
+        streaming_client.newFrameListener = frame_cb
+        streaming_client.rigidBodyListener = rigidbody_cb
         streaming_client.run()
         print("OptiTrack streaming client started")
 
@@ -389,7 +392,7 @@ if __name__ == "__main__":
 
     # Check OptiTrack if it's there
     ot_id = args["optitrack_id"]
-    ot_position, ot_attitude = setup_optitrack(args["optitrack"])
+    ot_position, ot_attitude = setup_optitrack(args["optitrack"], receive_new_frame, receive_rigidbody_frame)
 
     # Wait for fix
     if ot_position is not None:
