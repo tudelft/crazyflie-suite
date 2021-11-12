@@ -8,8 +8,8 @@ fi
 
 # Run
 python flight/log_flight.py \
-    --fileroot data/20211019 \
-    --filename model\
+    --fileroot data \
+    --filename example\
     --logconfig flight/logcfg.json \
     --space flight/space_cyberzoo.yaml \
     --estimator complementary \
@@ -18,3 +18,4 @@ python flight/log_flight.py \
     --safetypilot \
     --optitrack logging \
     --optitrack_id 1
+    --uri radio://0/80/2M/E7E7E7E7E7

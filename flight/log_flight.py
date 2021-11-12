@@ -72,56 +72,57 @@ class LogFlight():
             self.setup_optitrack()
 
     def get_filename(self):
+        # create default fileroot if not provided
+        if self.args["fileroot"] is None:
+            date = datetime.today().strftime(r"%Y_%m_%d")
+            self.args["fileroot"] = "data/" + date
+        
         fileroot = self.args["fileroot"] 
         
-        if self.args["filename"] is not None:
-            name = self.args["filename"] + ".csv"
-            fname = os.path.normpath(os.path.join(
-                os.getcwd(), fileroot, name))
-            i = 0
-            while os.path.isfile(fname):
-                i = i + 1
-                name = self.args["filename"] + "_" + str(i) + ".csv"
-                fname = os.path.normpath(os.path.join(
-                    os.getcwd(), fileroot, name))
-
-        else:
-            # get relevant arguments
-            keywords = self.args["keywords"]
+        # create default filename if not provided
+        if self.args["filename"] is None:
             estimator = self.args["estimator"]
             uwb = self.args["uwb"]
             optitrack = self.args["optitrack"]
             trajectory = self.args["trajectory"]
-
-            # Date
             date = datetime.today().strftime(r"%Y-%m-%d+%H:%M:%S")
 
-            # Additional keywords
-            if keywords is not None:
-                keywords = "+" + "+".join(keywords)
-            else:
-                keywords = ""
-
-            # Options
             if optitrack == "logging":
-                options = f"{estimator}+{uwb}{keywords}+optitracklog+{'_'.join(trajectory)}"
+                options = f"{estimator}+{uwb}+optitracklog+{'_'.join(trajectory)}"
             elif optitrack == "state":
-                options = f"{estimator}+{uwb}{keywords}+optitrackstate+{'_'.join(trajectory)}"
+                options = f"{estimator}+{uwb}+optitrackstate+{'_'.join(trajectory)}"
             else:
-                options = f"{estimator}+{uwb}{keywords}+{'_'.join(trajectory)}"
+                options = f"{estimator}+{uwb}+{'_'.join(trajectory)}"
 
-            # Join
             name = "{}+{}.csv".format(date, options)
             fname = os.path.normpath(os.path.join(os.getcwd(), fileroot, name))
+
+        else:
+            # make sure provided filename is unique
+            if self.args["filename"].endswith(".csv"):
+                name = self.args["filename"][:-4]
+            else:
+                name = self.args["filename"]
+            new_name = name + ".csv"
+            fname = os.path.normpath(os.path.join(
+                os.getcwd(), fileroot, new_name))
+
+            i = 0
+            while os.path.isfile(fname):
+                i = i + 1
+                new_name = name + "_" + str(i) + ".csv"
+                fname = os.path.normpath(os.path.join(
+                    os.getcwd(), fileroot, new_name))
+
         return fname
 
 
     def setup_logger(self):
-        # Create directory if not there
-        Path(self.args["fileroot"]).mkdir(exist_ok=True)
-        
         # Create filename from options and date
         self.log_file = self.get_filename()
+        # Create directory if not there
+        Path(self.args["fileroot"]).mkdir(exist_ok=True)
+
         print(f"Log location: {self.log_file}")
 
         # Logger setup
@@ -573,7 +574,7 @@ if __name__ == "__main__":
 
     # Parse arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--fileroot", type=str, required=True)
+    parser.add_argument("--fileroot", type=str, default=None)
     parser.add_argument("--keywords", nargs="+", type=str.lower, default=None)
     parser.add_argument("--logconfig", type=str, required=True)
     parser.add_argument("--space", type=str, required=True)
@@ -597,11 +598,12 @@ if __name__ == "__main__":
     )
     parser.add_argument("--optitrack_id", type=int, default=None)
     parser.add_argument("--filename", type=str, default=None)
+    parser.add_argument("--uri", type=str, default="radio://0/80/2M/E7E7E7E7E7")
     args = vars(parser.parse_args())
 
     # Set up log flight
     lf = LogFlight(args)
-    lf.connect_crazyflie("radio://0/80/2M/E8E7E7E7E8")
+    lf.connect_crazyflie(args["uri"])
     # Set up print connection to console
     # TODO: synchronize this with FileLogger: is this possible?
     lf.setup_console_dump()
