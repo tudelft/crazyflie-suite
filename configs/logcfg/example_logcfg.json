@@ -1,0 +1,37 @@
+{
+    "attitude":{
+        "name": "attitude",
+        "type": "CF",
+        "period": 10,
+        "variables": ["stabilizer.roll",
+                      "stabilizer.pitch",
+                      "stabilizer.yaw"],
+        "headers": ["roll", "pitch", "yaw"]
+    },
+
+    "state":{
+        "name": "state",
+        "type": "CF",
+        "period": 10,
+        "variables": ["stateEstimate.x",
+                      "stateEstimate.y",
+                      "stateEstimate.z",
+                      "stateEstimate.vx",
+                      "stateEstimate.vy",
+                      "stateEstimate.vz"],
+        "headers": ["stateX", "stateY", "stateZ", "stateVX", "stateVY", "stateVZ"]
+    },
+
+    "ot0":{
+        "name": "ot0",
+        "type": "EXT",
+        "period": 10,
+        "variables": ["otX0",
+                      "otY0",
+                      "otZ0",
+                      "otRoll0",
+                      "otPitch0",
+                      "otYaw0"],
+        "headers": ["otX0", "otY0", "otZ0", "otRoll0", "otPitch0", "otYaw0"]
+    }
+}

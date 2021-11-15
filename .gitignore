@@ -1,6 +1,6 @@
 venv/
 data/*
-configs/*
+configs/*/**
 analysis/*
 .vscode/
 **/__pycache__/
@@ -8,6 +8,4 @@ analysis/*
 **/cache/
 **/.ipynb_checkpoints/
 
-!data/example*
-!configs/example*
-!analysis/example*
+!**/example*
