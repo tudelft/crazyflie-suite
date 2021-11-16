@@ -88,13 +88,14 @@ class LogFlight():
             trajectory = self.args["trajectory"]
             date = datetime.today().strftime(r"%Y-%m-%d+%H:%M:%S")
 
+            traj = '_'.join(trajectory)
             if optitrack == "logging":
-                options = f"{estimator}+{uwb}+optitracklog+{'_'.join(trajectory)}"
+                options = "{}+{}+optitracklog+{}".format(estimator, uwb, traj)
             elif optitrack == "state":
-                options = f"{estimator}+{uwb}+optitrackstate+{'_'.join(trajectory)}"
+                options = "{}+{}+optitrackstate+{}".format(estimator, uwb, traj)
             else:
-                options = f"{estimator}+{uwb}+{'_'.join(trajectory)}"
-
+                options = "{}+{}+{}".format(estimator, uwb, traj)
+            
             name = "{}+{}.csv".format(date, options)
             fname = os.path.normpath(os.path.join(os.getcwd(), fileroot, name))
 
@@ -124,12 +125,13 @@ class LogFlight():
         # Create directory if not there
         Path(self.args["fileroot"]).mkdir(exist_ok=True)
 
-        print(f"Log location: {self.log_file}")
+        print("Log location: {}".format(self.log_file))
 
         # Logger setup
         logconfig = self.args["logconfig"]
         self.flogger = FileLogger(self._cf, logconfig, self.log_file)
         self.flogger.enableAllConfigs()
+
     def setup_optitrack(self):
         self.ot_id = self.args["optitrack_id"]
         self.ot_position = np.zeros(3)
@@ -455,7 +457,7 @@ class LogFlight():
             elif trajectory == "scan":
                 setpoints += scan(home["x"], home["y"], x_bound, y_bound, altitude)
             else:
-                raise ValueError(f"{trajectory} is an unknown trajectory")
+                raise ValueError("{} is an unknown trajectory".format(trajectory))
 
         # Add landing
         setpoints += landing(home["x"], home["y"], altitude, 0.0)
@@ -485,7 +487,7 @@ class LogFlight():
             # Do actual flight
             else:
                 for i, point in enumerate(setpoints):
-                    print(f"Next setpoint: {point}")
+                    print("Next setpoint: {}".format(point))
 
                     # Compute time based on distance
                     # Take-off
