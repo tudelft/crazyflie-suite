@@ -60,6 +60,11 @@ class FileLogger:
                 else:
                     print('Log config "{}" added'.format(cfg_name))
 
+    def enableAllConfigs(self):
+        """ Enable all configs in the current logcfg file"""
+        for cfg in self._cfg_defs:
+            self.enableConfig(cfg)
+
     def enableConfig(self, cfg_name):
         """ Enable a config defined in logcfg.json"""
         if cfg_name in self._cfg_defs:

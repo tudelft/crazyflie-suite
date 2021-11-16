@@ -19,6 +19,7 @@ import cflib.crtp
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie import Console
 from cfclient.utils.input import JoystickReader
+from cfclient.utils.config import Config
 
 import flight.utils as util
 from flight.FileLogger import FileLogger
@@ -128,32 +129,7 @@ class LogFlight():
         # Logger setup
         logconfig = self.args["logconfig"]
         self.flogger = FileLogger(self._cf, logconfig, self.log_file)
-
-        # Enable log configurations based on system setup:
-        # Defaults
-        self.flogger.enableConfig("attitude")
-        self.flogger.enableConfig("gyros")
-        self.flogger.enableConfig("acc")
-        self.flogger.enableConfig("state")
-        # UWB
-        if self.args["uwb"] == "twr":
-            self.flogger.enableConfig("twr")
-        elif self.args["uwb"] == "tdoa":
-            print("Needs custom TDoA logging in firmware!")
-            # For instance, see here: https://github.com/Huizerd/crazyflie-firmware/blob/master/src/utils/src/tdoa/tdoaEngine.c
-            # flogger.enableConfig("tdoa")
-        # Flow
-        if self.args["flow"]:
-            self.flogger.enableConfig("laser")
-            self.flogger.enableConfig("flow")
-        # OptiTrack
-        if self.args["optitrack"] != "none":
-            self.flogger.enableConfig("otpos")
-            self.flogger.enableConfig("otatt")
-        # Estimator
-        if self.args["estimator"] == "kalman":
-            self.flogger.enableConfig("kalman")
-
+        self.flogger.enableAllConfigs()
     def setup_optitrack(self):
         self.ot_id = self.args["optitrack_id"]
         self.ot_position = np.zeros(3)
@@ -195,39 +171,49 @@ class LogFlight():
 
     def ot_receive_rigidbody_frame(self, id, position, rotation):
         # Check ID
-        if id == self.ot_id:
-            # Register position
-            self.ot_position = util.ot2control(position)
-            ot_pos_dict = {
-                "otX": self.ot_position[0],
-                "otY": self.ot_position[1],
-                "otZ": self.ot_position[2],
-            }
-            self.flogger.registerData("otpos", ot_pos_dict)
-            # filter ot position for drone input
-            (self.filtered_pos[0], self.pos_filter_zi[0]) = scipy.signal.sosfilt(
-                self.ot_filter_sos, [self.ot_position[0]], zi=self.pos_filter_zi[0]
-            )
-            (self.filtered_pos[1], self.pos_filter_zi[1]) = scipy.signal.sosfilt(
-                self.ot_filter_sos, [self.ot_position[1]], zi=self.pos_filter_zi[1]
-            )
-            (self.filtered_pos[2], self.pos_filter_zi[2]) = scipy.signal.sosfilt(
-                self.ot_filter_sos, [self.ot_position[2]], zi=self.pos_filter_zi[2]
-            )
+        if id in self.ot_id:
+            # get optitrack data in crazyflie global frame
+            pos_in_cf_frame = util.ot2control(position)
+            att_in_cf_frame = util.quat2euler(rotation)
+            quat_in_cf_frame = util.ot2control_quat(rotation)
+            
+            idx = self.ot_id.index(id)
 
-            # Register attitude
-            self.ot_attitude = util.quat2euler(rotation)
-            self.ot_quaternion = util.ot2control_quat(rotation)
-            ot_att_dict = {
-                "otRoll": self.ot_attitude[0],
-                "otPitch": self.ot_attitude[1],
-                "otYaw": self.ot_attitude[2],
-                "otq0": self.ot_quaternion[0],
-                "otq1": self.ot_quaternion[1],
-                "otq2": self.ot_quaternion[2],
-                "otq3": self.ot_quaternion[3]
-            }
-            self.flogger.registerData("otatt", ot_att_dict)
+            if idx==0:
+                # main drone
+                ot_dict = {
+                    "otX0": pos_in_cf_frame[0],
+                    "otY0": pos_in_cf_frame[1],
+                    "otZ0": pos_in_cf_frame[2],
+                    "otRoll0": att_in_cf_frame[0],
+                    "otPitch0": att_in_cf_frame[1],
+                    "otYaw0": att_in_cf_frame[2]
+                }
+                self.ot_position = pos_in_cf_frame
+                self.ot_attitude = att_in_cf_frame
+                self.ot_quaternion = quat_in_cf_frame
+                self.flogger.registerData("ot0", ot_dict)
+                (self.filtered_pos[0], self.pos_filter_zi[0]) = scipy.signal.sosfilt(
+                    self.ot_filter_sos, [self.ot_position[0]], zi=self.pos_filter_zi[0]
+                )
+                (self.filtered_pos[1], self.pos_filter_zi[1]) = scipy.signal.sosfilt(
+                    self.ot_filter_sos, [self.ot_position[1]], zi=self.pos_filter_zi[1]
+                )
+                (self.filtered_pos[2], self.pos_filter_zi[2]) = scipy.signal.sosfilt(
+                    self.ot_filter_sos, [self.ot_position[2]], zi=self.pos_filter_zi[2]
+                )
+            elif idx==1:
+                ot_dict = {
+                    "otX1": pos_in_cf_frame[0],
+                    "otY1": pos_in_cf_frame[1],
+                    "otZ1": pos_in_cf_frame[2],
+                    "otRoll1": att_in_cf_frame[0],
+                    "otPitch1": att_in_cf_frame[1],
+                    "otYaw1": att_in_cf_frame[2]
+                }
+                self.flogger.registerData("ot1", ot_dict)
+
+
 
     def do_taskdump(self):
         self._cf.param.set_value("system.taskDump", "1")
@@ -318,9 +304,9 @@ class LogFlight():
                 group="imu_sensors", name="AK8963", cb=(
                     lambda name, found: self._jr.set_alt_hold_available(
                         eval(found))))
-            self._jr.assisted_control_updated.add_callback(
-                lambda enabled: self._cf.param.set_value("flightmode.althold",
-                                                     enabled))
+            # self._jr.assisted_control_updated.add_callback(
+            #     lambda enabled: self._cf.param.set_value("flightmode.althold",
+            #                                          enabled))
             self._cf.open_link(uri)
             self._jr.input_updated.add_callback(self.controller_input_cb)
             
@@ -513,7 +499,7 @@ class LogFlight():
 
                     # If zero distance, at least some wait time
                     if distance == 0.0:
-                        wait = 1
+                        wait = 5
                     else:
                         wait = distance * 2
 
@@ -525,7 +511,7 @@ class LogFlight():
                         # If we use OptiTrack for control, send position to Crazyflie
                         if optitrack == "state":
                             cf.extpos.send_extpos(
-                                self.ot_position[0], self.ot_position[1], self.ot_position[2]
+                                self.filtered_pos[0], self.filtered_pos[1], self.filtered_pos[2]
                             )
                         cf.commander.send_position_setpoint(*point)
                         time.sleep(0.05)
@@ -533,10 +519,10 @@ class LogFlight():
                         time_since_dump += 0.05
 
                     # Task dump
-                    if time_since_dump > 2:
-                        print("Do task dump")
-                        self.do_taskdump()
-                        time_since_dump = 0.0
+                    # if time_since_dump > 2:
+                    #     print("Do task dump")
+                    #     self.do_taskdump()
+                    #     time_since_dump = 0.0
 
                 # Finished
                 cf.commander.send_stop_setpoint()
@@ -561,6 +547,7 @@ class LogFlight():
         self.console_dump_enabled = True
 
     def _console_cb(self, text):
+        # print(text)
         self.console_log.append(text)
 
     def end(self):
@@ -596,7 +583,7 @@ if __name__ == "__main__":
         type=str.lower,
         default="none",
     )
-    parser.add_argument("--optitrack_id", type=int, default=None)
+    parser.add_argument("--optitrack_id", nargs="+", type=int, default=None)
     parser.add_argument("--filename", type=str, default=None)
     parser.add_argument("--uri", type=str, default="radio://0/80/2M/E7E7E7E7E7")
     args = vars(parser.parse_args())
