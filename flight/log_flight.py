@@ -33,6 +33,7 @@ class Mode(enum.Enum):
     MANUAL = 1
     AUTO = 2
     MODE_SWITCH = 3
+    DONT_FLY = 4
 
 class LogFlight():
     def __init__(self, args):
@@ -45,12 +46,19 @@ class LogFlight():
         self._jr = JoystickReader(do_device_discovery=False)
 
         # Set flight mode
-        if self.args["trajectory"][0] == "manual": 
+        if self.args["trajectory"] is None or \
+                self.args["trajectory"][0] == "none":
+            self.mode = Mode.DONT_FLY
+            print("Mode set to [DONT_FLY]")
+        elif self.args["trajectory"][0] == "manual": 
             self.mode = Mode.MANUAL
+            print("Mode set to [MANUAL]")
         elif self.args["safetypilot"]:
             self.mode = Mode.MODE_SWITCH
+            print("Mode set to [MODE_SWITCH]")
         else:
             self.mode = Mode.AUTO
+            print("Mode set to [AUTO]")
         
         # Setup for specified mode
         if self.mode == Mode.AUTO:
@@ -59,6 +67,8 @@ class LogFlight():
             if args["uwb"] == "none":
                 assert args["optitrack"] == "state", "OptiTrack state needed in absence of UWB"
                 assert args["estimator"] == "kalman", "OptiTrack state needs Kalman estimator"
+        elif self.mode == Mode.DONT_FLY:
+            self.is_in_manual_control = False
         else:
             # Check if controller is connected
             assert self.controller_connected(), "No controller detected."
@@ -298,7 +308,7 @@ class LogFlight():
         self._cf.connection_failed.add_callback(self._connection_failed)
         self._cf.connection_lost.add_callback(self._connection_lost)
 
-        if self.mode == Mode.AUTO:
+        if self.mode == Mode.AUTO or self.mode == Mode.DONT_FLY:
             self._cf.open_link(uri)
         else:
             # Add callbacks for manual control
@@ -370,6 +380,13 @@ class LogFlight():
             if self.mode == Mode.MANUAL:
                 print("Manual Flight - Ready to fly")
                 self.manual_flight()
+            elif self.mode == Mode.DONT_FLY:
+                print("Ready to not fly")
+                try:
+                    while True:
+                        pass
+                except KeyboardInterrupt:
+                    print("Flight stopped")
             else:
                 # Build trajectory
                 setpoints = self.build_trajectory(self.args["trajectory"], self.args["space"])
@@ -536,7 +553,7 @@ class LogFlight():
             else:
                 print("Emergency landing!")
                 wait = setpoints[i][2] * 2
-                cf.commander.send_position_setpoint(*setpoints[i][:2], 0.0, 0.0)
+                cf.commander.send_position_setpoint(setpoints[i][0], setpoints[i][1], 0.0, 0.0)
                 time.sleep(wait)
                 cf.commander.send_stop_setpoint()
 
@@ -577,7 +594,7 @@ if __name__ == "__main__":
         "--uwb", choices=["none", "twr", "tdoa"], type=str.lower, required=True
     )
     parser.add_argument("--flow", action="store_true")
-    parser.add_argument("--trajectory", nargs="+", type=str.lower, required=True)
+    parser.add_argument("--trajectory", nargs="+", type=str.lower, default=None)
     parser.add_argument("--safetypilot", action="store_true")
     parser.add_argument(
         "--optitrack",
