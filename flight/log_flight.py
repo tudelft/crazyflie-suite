@@ -247,17 +247,17 @@ class LogFlight():
 
         marker9_pos_in_cf_frame = util.ot2control(labeledMarkersInfo[8])
         marker9_dict = {
-            "marker8_x": marker9_pos_in_cf_frame[0],
-            "marker8_y": marker9_pos_in_cf_frame[1],
-            "marker8_z": marker9_pos_in_cf_frame[2]
+            "marker9_x": marker9_pos_in_cf_frame[0],
+            "marker9_y": marker9_pos_in_cf_frame[1],
+            "marker9_z": marker9_pos_in_cf_frame[2]
         }
         self.flogger.registerData("marker9_pos", marker9_dict)
 
         marker10_pos_in_cf_frame = util.ot2control(labeledMarkersInfo[9])
         marker10_dict = {
-            "marker8_x": marker10_pos_in_cf_frame[0],
-            "marker8_y": marker10_pos_in_cf_frame[1],
-            "marker8_z": marker10_pos_in_cf_frame[2]
+            "marker10_x": marker10_pos_in_cf_frame[0],
+            "marker10_y": marker10_pos_in_cf_frame[1],
+            "marker10_z": marker10_pos_in_cf_frame[2]
         }
         self.flogger.registerData("marker10_pos", marker10_dict)
 
