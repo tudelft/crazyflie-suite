@@ -72,7 +72,7 @@ class LogFlight():
         else:
             # Check if controller is connected
             assert self.controller_connected(), "No controller detected."
-            self.setup_controller(map="flappy")
+            self.setup_controller(map="SM600")
             self.is_in_manual_control = True
 
         # Setup the logging framework
@@ -178,8 +178,89 @@ class LogFlight():
                 self._cf.param.set_value("complementaryFilter.reset", "0")
             except:
                 pass
-    def ot_receive_new_frame(self, *args, **kwargs):
-        pass
+    # modified by Chenyao 
+    def ot_receive_new_frame(self, frameNumber, markerSetCount, unlabeledMarkersCount, rigidBodyCount, skeletonCount,labeledMarkerCount,latency,timecode,timecodeSub,timestamp,isRecording,trackedModelsChanged,labeledMarkersInfo,):
+
+        marker1_pos_in_cf_frame = util.ot2control(labeledMarkersInfo[0])
+        marker1_dict = {
+            "marker1_x": marker1_pos_in_cf_frame[0],
+            "marker1_y": marker1_pos_in_cf_frame[1],
+            "marker1_z": marker1_pos_in_cf_frame[2]
+        }
+        self.flogger.registerData("marker1_pos", marker1_dict)
+
+        marker2_pos_in_cf_frame = util.ot2control(labeledMarkersInfo[1])
+        marker2_dict = {
+            "marker2_x": marker2_pos_in_cf_frame[0],
+            "marker2_y": marker2_pos_in_cf_frame[1],
+            "marker2_z": marker2_pos_in_cf_frame[2]
+        }
+        self.flogger.registerData("marker2_pos", marker2_dict)
+
+        marker3_pos_in_cf_frame = util.ot2control(labeledMarkersInfo[2])
+        marker3_dict = {
+            "marker3_x": marker3_pos_in_cf_frame[0],
+            "marker3_y": marker3_pos_in_cf_frame[1],
+            "marker3_z": marker3_pos_in_cf_frame[2]
+        }
+        self.flogger.registerData("marker3_pos", marker3_dict)
+
+        marker4_pos_in_cf_frame = util.ot2control(labeledMarkersInfo[3])
+        marker4_dict = {
+            "marker4_x": marker4_pos_in_cf_frame[0],
+            "marker4_y": marker4_pos_in_cf_frame[1],
+            "marker4_z": marker4_pos_in_cf_frame[2]
+        }
+        self.flogger.registerData("marker4_pos", marker4_dict)
+
+        marker5_pos_in_cf_frame = util.ot2control(labeledMarkersInfo[4])
+        marker5_dict = {
+            "marker5_x": marker5_pos_in_cf_frame[0],
+            "marker5_y": marker5_pos_in_cf_frame[1],
+            "marker5_z": marker5_pos_in_cf_frame[2]
+        }
+        self.flogger.registerData("marker5_pos", marker5_dict)
+
+        marker6_pos_in_cf_frame = util.ot2control(labeledMarkersInfo[5])
+        marker6_dict = {
+            "marker6_x": marker6_pos_in_cf_frame[0],
+            "marker6_y": marker6_pos_in_cf_frame[1],
+            "marker6_z": marker6_pos_in_cf_frame[2]
+        }
+        self.flogger.registerData("marker6_pos", marker6_dict)
+
+        marker7_pos_in_cf_frame = util.ot2control(labeledMarkersInfo[6])
+        marker7_dict = {
+            "marker7_x": marker7_pos_in_cf_frame[0],
+            "marker7_y": marker7_pos_in_cf_frame[1],
+            "marker7_z": marker7_pos_in_cf_frame[2]
+        }
+        self.flogger.registerData("marker7_pos", marker7_dict)
+
+        marker8_pos_in_cf_frame = util.ot2control(labeledMarkersInfo[7])
+        marker8_dict = {
+            "marker8_x": marker8_pos_in_cf_frame[0],
+            "marker8_y": marker8_pos_in_cf_frame[1],
+            "marker8_z": marker8_pos_in_cf_frame[2]
+        }
+        self.flogger.registerData("marker8_pos", marker8_dict)
+
+        marker9_pos_in_cf_frame = util.ot2control(labeledMarkersInfo[8])
+        marker9_dict = {
+            "marker8_x": marker9_pos_in_cf_frame[0],
+            "marker8_y": marker9_pos_in_cf_frame[1],
+            "marker8_z": marker9_pos_in_cf_frame[2]
+        }
+        self.flogger.registerData("marker9_pos", marker9_dict)
+
+        marker10_pos_in_cf_frame = util.ot2control(labeledMarkersInfo[9])
+        marker10_dict = {
+            "marker8_x": marker10_pos_in_cf_frame[0],
+            "marker8_y": marker10_pos_in_cf_frame[1],
+            "marker8_z": marker10_pos_in_cf_frame[2]
+        }
+        self.flogger.registerData("marker10_pos", marker10_dict)
+
 
     def ot_receive_rigidbody_frame(self, id, position, rotation):
         # Check ID
@@ -473,6 +554,10 @@ class LogFlight():
                 setpoints += randoms(home["x"], home["y"], x_bound, y_bound, altitude)
             elif trajectory == "scan":
                 setpoints += scan(home["x"], home["y"], x_bound, y_bound, altitude)
+            elif trajectory == "star":
+                setpoints += star(home["x"], home["y"], radius, altitude)
+            elif trajectory == "pitch":
+                setpoints += pitch(home["x"], home["y"], altitude)
             else:
                 raise ValueError("{} is an unknown trajectory".format(trajectory))
 

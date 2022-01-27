@@ -60,3 +60,13 @@ def randoms(x0, y0, x_bound, y_bound, altitude):
 def scan(x0, y0, x_bound, y_bound, altitude):
     setpoints = scan_area(x_bound, y_bound, 0.5, altitude, 0.0)
     return setpoints
+
+
+## self-defined trajectories
+def star(x0, y0, radius,altitude):
+    setpoints = xy_star(x0, y0, radius, altitude, 0.0)
+    return setpoints
+
+def pitch(x0, y0, altitude):
+    setpoints = xy_pitch(x0, y0, altitude, 0.0)
+    return setpoints

@@ -230,6 +230,8 @@ class NatNetClient:
             )
             offset += 4
             trace("Labeled Marker Count:", labeledMarkerCount)
+            # added by Chenyao
+            labeledMarkersInfo = {}
             for i in range(0, labeledMarkerCount):
                 id = int.from_bytes(data[offset : offset + 4], byteorder="little")
                 offset += 4
@@ -237,6 +239,8 @@ class NatNetClient:
                 offset += 12
                 size = FloatValue.unpack(data[offset : offset + 4])
                 offset += 4
+                # added by Chenyao
+                labeledMarkersInfo[id] = pos
 
                 # Version 2.6 and later
                 if (
@@ -331,7 +335,10 @@ class NatNetClient:
                 timestamp,
                 isRecording,
                 trackedModelsChanged,
+                labeledMarkersInfo,
             )
+        # added by Chenyao
+        labeledMarkersInfo.clear()
 
     # Unpack a marker set description packet
     def __unpackMarkerSetDescription(self, data):
