@@ -240,7 +240,7 @@ class NatNetClient:
                 size = FloatValue.unpack(data[offset : offset + 4])
                 offset += 4
                 # added by Chenyao
-                labeledMarkersInfo[id] = pos
+                labeledMarkersInfo[i] = pos
 
                 # Version 2.6 and later
                 if (
@@ -334,7 +334,7 @@ class NatNetClient:
                 timecodeSub,
                 timestamp,
                 isRecording,
-                trackedModelsChanged,
+                #trackedModelsChanged,
                 labeledMarkersInfo,
             )
         # added by Chenyao

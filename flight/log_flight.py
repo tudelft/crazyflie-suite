@@ -179,7 +179,7 @@ class LogFlight():
             except:
                 pass
     # modified by Chenyao 
-    def ot_receive_new_frame(self, frameNumber, markerSetCount, unlabeledMarkersCount, rigidBodyCount, skeletonCount,labeledMarkerCount,latency,timecode,timecodeSub,timestamp,isRecording,trackedModelsChanged,labeledMarkersInfo,):
+    def ot_receive_new_frame(self, framenumber, markerSetCount, unlabeledMarkersCount, rigidBodyCount, skeletonCount,labeledMarkerCount,latency,timecode,timecodeSub,timestamp,isRecording,labeledMarkersInfo,):
 
         marker1_pos_in_cf_frame = util.ot2control(labeledMarkersInfo[0])
         marker1_dict = {
@@ -253,13 +253,7 @@ class LogFlight():
         }
         self.flogger.registerData("marker9_pos", marker9_dict)
 
-        marker10_pos_in_cf_frame = util.ot2control(labeledMarkersInfo[9])
-        marker10_dict = {
-            "marker10_x": marker10_pos_in_cf_frame[0],
-            "marker10_y": marker10_pos_in_cf_frame[1],
-            "marker10_z": marker10_pos_in_cf_frame[2]
-        }
-        self.flogger.registerData("marker10_pos", marker10_dict)
+
 
 
     def ot_receive_rigidbody_frame(self, id, position, rotation):

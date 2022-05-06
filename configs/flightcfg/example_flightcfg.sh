@@ -12,9 +12,9 @@ python flight/log_flight.py \
     --filename example\
     --logconfig configs/logcfg/example_logcfg.json \
     --space flight/space_cyberzoo.yaml \
-    --estimator complementary \
+    --estimator kalman \
     --uwb none \
-    --trajectory manual \
-    --optitrack logging \
+    --trajectory hover \
+    --optitrack state \
     --optitrack_id 1 \
     --uri radio://0/80/2M/E7E7E7E7E7

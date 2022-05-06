@@ -33,5 +33,37 @@
                       "otPitch0",
                       "otYaw0"],
         "headers": ["otX0", "otY0", "otZ0", "otRoll0", "otPitch0", "otYaw0"]
+    },
+
+    "motor":{
+        "name": "motor",
+        "type": "CF",
+        "period": 10,
+        "variables": ["motor.m1",
+                      "motor.m2",
+                      "motor.m3",
+                      "motor.m4"
+                      ],
+        "headers": ["motor1", "motor2", "motor3", "motor4"]
+    },
+
+    "battery":{
+        "name": "battery",
+        "type": "CF",
+        "period": 10,
+        "variables": ["pm.vbat"
+                      ],
+        "headers": ["voltage"]
+    },
+
+    "angularvelocity":{
+        "name": "angularvelocity",
+        "type": "CF",
+        "period": 10,
+        "variables": ["gyro.x",
+                        "gyro.y",
+                        "gyro.z"
+                      ],
+        "headers": ["roll rate", "pitch rate", "yaw rate"]
     }
 }
