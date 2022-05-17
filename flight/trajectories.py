@@ -101,3 +101,25 @@ def xy_polygon(x0, y0, N, radius, altitude, yaw):
     setpoints.append(setpoints[0])
 
     return setpoints
+
+
+## self-defined trajetories
+def xy_star(x0, y0, radius, altitude, yaw):
+    setpoints = [];
+    for i in range(5):
+        angle  = 0.8 * np.pi *i;
+        x = radius * np.cos(angle)
+        y = radius * np.sin(angle)
+        setpoints.append((x0 + x, y0 + y, altitude, yaw))
+    setpoints.append(setpoints[0])
+
+    return setpoints
+
+def xy_pitch(x0, y0, altitude, yaw):
+    setpoints = [];
+    setpoints.append((x0 - 2, y0, altitude, yaw))
+    setpoints.append((x0 - 1.0, y0, altitude + 1.0, yaw))
+    setpoints.append((x0 + 1.0, y0, altitude + 1.0, yaw))
+    setpoints.append((x0, y0, altitude, yaw))
+
+    return setpoints
